@@ -40,7 +40,7 @@ Then, create the file /etc/rsyslog.d/20-bash.conf:
 ```
 local1.*    /var/log/bash_cmds.log
 ```
-With this, local 1 logs are written to the log file. Finally, run `$ source /etc/profile` to apply the modifications from /etc/profile.d/cmdlog.sh. 
+With this, local1 logs are written to the log file. Finally, run `$ source /etc/profile` to apply the modifications from /etc/profile.d/cmdlog.sh. 
 
 - For sudo, create the /etc/rsyslog.d/30-sudo.conf file:
 ```
@@ -81,7 +81,7 @@ In this context, auditd will be used to log:
 - any cron changes, which could indicate that an attacker is attempting to establish persistence
 - changes in the services available, which could be used to achieve persistence as well
 
-We create auditd rules in the file /etc/audit/rules.d/soc.rules:
+We create auditd rules in the file /etc/audit/rules.d/soc.rules :
 ```
 # sudoers
 -w /etc/sudoers -p wa -k sudoers_change
@@ -119,11 +119,6 @@ $ sudo auditctl -l
 
 To test the auditd configuration, we can run commands that will trigger the rules, such as a privileged command for instance. Then use `$ ausearch -k privileged_cmd` to verify that the action was logged. The auditd logs are in the /var/log/audit/audit.log file.
 
-
-systemctl status systemd-journald
--> logs systèmes
-
-!! pas d'alertes directes pour ce qui génère trop de logs genre cmd uid 0 et 
 
 ## Logrotate
 
@@ -219,7 +214,7 @@ Then restart the splunk forwarder:
 `$ sudo /opt/splunkforwarder/bin/splunk restart`
 
 And view the current forwarder:
-$ sudo /opt/splunkforwarder/bin/splunk list forward-server
+`$ sudo /opt/splunkforwarder/bin/splunk list forward-server`
 
 The output shows that the installation was successful:
 ```
