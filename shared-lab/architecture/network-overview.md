@@ -83,8 +83,8 @@ iface eth0 inet dhcp
 - Each VM is able to ping others through the internal network, for example in order to ping the Ubuntu endpoint from Kali: `$ ping -I eth1 10.10.10.2`
 
 To check that the Monitoring VM is able to see the traffic between other VMs:
-- Start capturing traffic on the Monitoring machine: `$ sudo tcpdump -i enp0s8`
+- Start capturing traffic on the internal network with the Monitoring machine: `$ sudo tcpdump -i enp0s8`
 - Start the Ubuntu endpoint
-- Ping the Ubuntu endpoint from the Windows endpoint on the local network: 
+- Ping the Ubuntu endpoint from the Windows endpoint on the internal network: 
 `$ ping 10.10.10.2 -S 10.10.10.3`
 - The traffic captured by the monitoring machine should show the corresponding ICMP packets
