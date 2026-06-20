@@ -48,7 +48,7 @@ if $programname == 'sudo' then /var/log/sudo.log
 & stop
 ```
 
-To check if the rsyslog rules are correct, use : 
+To check whether the rsyslog rules are correct, use : 
 `$ sudo rsyslogd -N1`.
 Then restart the service with `$ sudo systemctl restart rsyslog`
 
@@ -73,10 +73,10 @@ $ systemctl status auditd
 
 In this context, auditd will be used to log:
 - any changes made to sudoers file or sudoers.d folder, which could allow unauthorized users to execute commands with root privileges if modified
-- any changes made to the /ect/passwd or /etc/shadow files, which can be used to change permissions or add users
+- any changes made to the /etc/passwd or /etc/shadow files, which can be used to change permissions or add users
 - execution of privileged commands, this includes sudo, suid, programs with uid set to 0, etc
 - file deletion, this could be an attempt to destroy evidence of the attack, or disable security controls
-- hostname changes, which could lead to confusion in the logs if a change occured during an attack without being monitored
+- hostname changes, which could lead to confusion in the logs if a change occurred during an attack without being monitored
 - any group changes, which can lead to permission abuse
 - any cron changes, which could indicate that an attacker is attempting to establish persistence
 - changes in the services available, which could be used to achieve persistence as well
@@ -222,5 +222,5 @@ Active forwards:
     192.168.1.52:9997
 ```
 
-To verify that the logs are accessible in Splunk, we need to configure Splunk on the windows host machine.
-Any new event generated on the Ubuntu endpoint should now be forwarded to Splunk and be searchable through the dashboard.
+To verify that the logs are accessible in Splunk, we use the Splunk instance configured in the SIEM setup section of this repository.
+Any new event generated on the Ubuntu endpoint should now be forwarded to Splunk and be searchable through the dashboard, with the index linux_os.
