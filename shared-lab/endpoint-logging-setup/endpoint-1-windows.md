@@ -52,6 +52,11 @@ The following event IDs will be specifically useful:
 ```
 
 
+## Yara
+
+Pipeline yara
+
+
 ## Splunk Universal Forwarder
 
 The Splunk Universal Forwarder must be downloaded from the Splunk website.

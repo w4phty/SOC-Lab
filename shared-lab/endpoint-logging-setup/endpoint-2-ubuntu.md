@@ -119,6 +119,10 @@ $ sudo auditctl -l
 
 To test the auditd configuration, we can run commands that will trigger the rules, such as a privileged command for instance. Then use `$ ausearch -k privileged_cmd` to verify that the action was logged. The auditd logs are in the /var/log/audit/audit.log file.
 
+## Yara
+
+Pipeline yara
+
 
 ## Logrotate
 
@@ -170,6 +174,7 @@ Apply the logrotate configuration:
 `$ sudo logrotate -d /etc/logrotate.conf`
 
 The auditd logs rotation is handled by auditd itself. This can be checked in the /etc/audit/auditd.conf file with the parameter: `max_log_file_action = ROTATE`.
+
 
 ## Splunk Forwarder
 

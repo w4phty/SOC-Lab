@@ -3,7 +3,7 @@
 The SOC Lab requires 2 endpoints, Ubuntu and Windows, a monitoring machine and a machine hosting the SIEM.
 The monitoring machine's main role is to capture the ongoing traffic on the internal network.
 
-The endpoints and the monitoring machine are Virtual Machines, set using Virtual Box. The SIEM is hosted by the host machine, and receives the logs forwarded by the endpoints and the monitoring machine.
+The endpoints and the monitoring machine are Virtual Machines, set using VirtualBox. The SIEM is hosted by the host machine, and receives the logs forwarded by the endpoints and the monitoring machine.
 The attacks are simulated from a Kali Linux Virtual Machine.
 
 Each VM is connected to 2 networks:
@@ -88,3 +88,7 @@ To check that the Monitoring VM is able to see the traffic between other VMs:
 - Ping the Ubuntu endpoint from the Windows endpoint on the internal network: 
 `$ ping 10.10.10.2 -S 10.10.10.3`
 - The traffic captured by the monitoring machine should show the corresponding ICMP packets
+
+## Point of attention
+
+Logs can grow quickly on the virtual machines, especially with tools such as sysmon, auditd and zeek. To prevent any storage problem, a log rotation is set up. However, rotation might not be enough given the limited amount of space allocated to the virtual machines. This is why a clone of each VM was made. Additionnaly, monitoring the space usage while using the lab is also important, so that the virtual disk size can be adapted.
