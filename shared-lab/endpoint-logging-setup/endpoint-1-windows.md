@@ -54,7 +54,109 @@ The following event IDs will be specifically useful:
 
 ## Yara
 
-Pipeline yara
+The YARA pipeline detection will work as follows for this lab:
+- Sysmon detects the creation of a new file
+- An Event with the ID 11 is generated
+- A task configured in the Task Scheduler detects this event
+- The task triggers the invoke-yara.ps1
+- YARA analyzes the detected file
+- If a rule matches, an event log is created
+- The log is sent to splunk through splunk universal forwarder
+
+#### Installation
+
+YARA is downloaded from `https://github.com/VirusTotal/yara/releases` and stored in the `C:\tools\yara\` directory.
+Verify the version from a Command Prompt terminal with `> yara32.exe --version`.
+
+#### YARA rules
+
+The first YARA rule detects common mimikatz strings such as `sekurlsa::logonpasswords` which is a command that allows an attacker to extract cleartext passwords and NTLM hashes, `kerberos::list` which lists kerberos tickets or `lsadump::sam` which dumps hashes from the SAM database.
+
+
+Here is the content of the first rule, stored in the `C:\tools\yara\rules\mimikatz.yar` file:
+```
+rule Mimikatz_Indicators
+{
+    meta:
+        description = "Detects common Mimikatz strings"
+        date = "2026-06-25"
+
+    strings:
+        $s1 = "mimikatz" ascii nocase
+        $s2 = "sekurlsa::logonpasswords" ascii nocase
+        $s3 = "kerberos::list" ascii nocase
+        $s4 = "privilege::debug" ascii nocase
+        $s5 = "lsadump::sam" ascii nocase
+
+    condition:
+        2 of them
+}
+```
+
+The second rule detects traces of a malicious powershell scripts, looking for techniques such as base64 encoding, remote script downloading, or executing code received as text.
+
+Here is the content of the first rule, stored in the `C:\tools\yara\rules\powershell.yar` file:
+
+```
+rule PowerShell_Dropper_Indicators
+{
+    meta:
+        description = "Detects powershell dropper indicators"
+        date = "2026-06-25"
+
+    strings:
+        $s1 = "powershell -enc" ascii nocase
+        $s2 = "FromBase64String" ascii nocase
+        $s3 = "DownloadString" ascii nocase
+        $s4 = "IEX(" ascii nocase
+        $s5 = "Invoke-Expression" ascii nocase
+
+    condition:
+        2 of them
+}
+```
+
+#### YARA script and scheduled task
+
+Windows Event Log requires a log source to exist before any program can write entries to it. This means that we first need to create an Event Log source for YARA:
+`New-EventLog -LogName Application -Source YARA`.
+
+The next step is to create an `invoke-yara.ps1` script that will retrieve the file path of the last Sysmon Create File Event (ID 11), and if the extension matches one of the monitored extensions, the script runs YARA against the file. If YARA detects a match, the scan result is written to the Windows Event Log. Below is the content of the `C:\yara\scripts\invoke-yara.ps1` script:
+```
+$Event = Get-WinEvent -FilterHashtable @{LogName='Microsoft-Windows-Sysmon/Operational'; Id=11} -MaxEvents 1
+
+$Xml = [xml]$Event.ToXml()
+
+$AllowedExt = @(".exe",".dll",".ps1",".bat",".vbs")
+
+$TargetFile = (
+    $Xml.Event.EventData.Data |
+    Where-Object {$_.Name -eq "TargetFilename"}
+).'#text'
+
+
+if ($AllowedExt -contains [IO.Path]::GetExtension($TargetFile)) -and (Test-Path $TargetFile)
+{
+    $Result = & C:\tools\yara\yara32.exe `
+        C:\tools\yara\rules\*.yar `
+        $TargetFile
+
+    if ($Result)
+    {
+        Write-EventLog `
+            -LogName Application `
+            -Source YARA `
+            -EventId 9001 `
+            -EntryType Warning `
+            -Message $Result
+    }
+}
+```
+
+The execution policy needs to be updated to allow the execution of the script on the endpoint: `Set-ExecutionPolicy RemoteSigned -Scope LocalMachine`.
+
+The scheduled task can now be created in the Task Scheduler. The task is named `SOC - YARA trigger`. The trigger is "On an event", based on the `Microsoft-Windows-Sysmon/Operational` log, using `Sysmon` source and Event ID 11.
+The action program is `powershell.exe` with the arguments `-ExecutionPolicy Bypass -File C:\yara\scripts\invoke-yara.ps1`.
 
 
 ## Splunk Universal Forwarder
@@ -100,6 +202,10 @@ current_only = 0
 disabled = 0
 index = windows_os
 current_only = 0
+
+[WinEventLog://Application]
+index=windows_os
+sourcetype=yara
 ```
 
 The last step is to restart the splunk forwarder in PowerShell:

