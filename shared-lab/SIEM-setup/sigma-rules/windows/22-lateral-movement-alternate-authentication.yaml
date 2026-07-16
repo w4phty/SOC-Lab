@@ -1,0 +1,28 @@
+title: Lateral Movement - Indices d'utilisation de materiel d'authentification alternatif
+id: 8e1a1b60-1001-4a10-9a1f-00000000000c
+status: experimental
+description: |
+  Technique difficile a detecter avec les champs actuellement mappes (pas de
+  visibilite sur EventID 4648/4672 specifiques ni sur les tickets Kerberos
+  dans ce lab). Proxy partiel : detecte les executions d'outils connus de
+  pass-the-hash / overpass-the-ticket via la ligne de commande Sysmon.
+  A completer plus tard avec l'ajout des EventID 4648 (logon explicite) et
+  4672 (privileges speciaux assignes) dans le mapping Splunk.
+references:
+  - https://attack.mitre.org/techniques/T1550/
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    CommandLine|contains:
+      - 'sekurlsa::pth'
+      - 'over-pass-the-hash'
+      - '/ptt'
+  condition: selection
+falsepositives:
+  - Tests d'equipe purple team documentes
+level: high
+tags:
+  - attack.lateral_movement
+  - attack.t1550

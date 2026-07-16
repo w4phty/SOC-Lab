@@ -1,0 +1,27 @@
+title: Command and Control - Tunneling ou C2 via DNS
+id: 8e1a1b60-1003-4a10-9a1f-000000000006
+status: experimental
+description: |
+  Reprend les trois alertes Suricata DNS existantes qui couvrent ensemble ce
+  cas d'usage : domaines DGA (sid 1000004), sous-domaines anormalement longs
+  (sid 1000005) et tunneling base64 (sid 1000006). Correlation possible avec
+  zeek_dns (query, record_type) pour confirmer le volume de requetes vers le
+  meme domaine parent. Champs suricata : alert_signature, src_ip, dest_ip.
+references:
+  - https://attack.mitre.org/techniques/T1071/004/
+logsource:
+  product: suricata
+  category: ids
+detection:
+  selection:
+    alert_signature|contains:
+      - 'Possible DGA Domain'
+      - 'Long subdomain'
+      - 'Possible base64 tunneling'
+  condition: selection
+falsepositives:
+  - CDN/services cloud utilisant des sous-domaines longs generes (a whitelister au cas par cas)
+level: high
+tags:
+  - attack.command_and_control
+  - attack.t1071.004

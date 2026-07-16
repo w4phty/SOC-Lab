@@ -1,0 +1,23 @@
+title: Persistence - Creation de tache planifiee via schtasks
+id: 8e1a1b60-1001-4a10-9a1f-000000000004
+status: experimental
+description: |
+  Detecte la creation d'une tache planifiee en ligne de commande, technique de
+  persistence classique. Champs Sysmon : executable, command_line.
+references:
+  - https://attack.mitre.org/techniques/T1053/005/
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection_img:
+    Image|endswith: '\schtasks.exe'
+  selection_cmd:
+    CommandLine|contains: '/create'
+  condition: selection_img and selection_cmd
+falsepositives:
+  - Deploiement logiciel legitime creant des taches planifiees (GPO, agents EDR)
+level: medium
+tags:
+  - attack.persistence
+  - attack.t1053.005

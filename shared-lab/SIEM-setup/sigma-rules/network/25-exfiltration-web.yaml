@@ -1,0 +1,28 @@
+title: Exfiltration - Transfert de donnees vers un service web externe
+id: 8e1a1b60-1003-4a10-9a1f-000000000007
+status: experimental
+description: |
+  LIMITATION : les champs orig_bytes/resp_bytes de zeek_conn ne sont pas
+  mappes dans ce lab, il est donc impossible de filtrer par volume de
+  donnees transferees (signal habituellement central pour l'exfiltration).
+  Detection de repli basee sur la duree de connexion (duration) vers une IP
+  externe non repertoriee, combinee avec l'alerte Suricata "Cleartext
+  Credentials" qui peut reveler un envoi de donnees sensibles en clair vers
+  un service web. Recommandation : mapper orig_bytes/resp_bytes pour affiner.
+  Champs zeek_conn : src_ip, dest_ip, dest_port, duration, conn_status.
+references:
+  - https://attack.mitre.org/techniques/T1567/
+logsource:
+  product: zeek
+  service: conn
+detection:
+  selection:
+    dest_port: 443
+    duration|gte: 60
+  condition: selection
+falsepositives:
+  - Sessions web longues legitimes (streaming, mise a jour logicielle volumineuse)
+level: medium
+tags:
+  - attack.exfiltration
+  - attack.t1567

@@ -1,0 +1,31 @@
+title: Discovery - Reconnaissance de services reseau
+id: 8e1a1b60-1003-4a10-9a1f-000000000004
+status: experimental
+description: |
+  Reutilise l'alerte Suricata de scan (sid 1000001) en tant que signal
+  Discovery lorsque la source du scan est un hote interne (mouvement
+  laterale/discovery post-compromission), a distinguer de T1595 qui vise un
+  scan externe vers le lab. Ajoute une correlation Sysmon/auditd sur les
+  outils d'enumeration (nmap, netstat) lances localement.
+  Champs suricata : src_ip, dest_ip, alert_signature.
+  Champs Sysmon/auditd : command_line.
+references:
+  - https://attack.mitre.org/techniques/T1046/
+logsource:
+  product: suricata
+  category: ids
+detection:
+  selection_scan:
+    alert_signature|contains: 'SOC-LAB Possible TCP SYN Scan'
+  selection_tool:
+    command_line|contains:
+      - 'nmap '
+      - 'netstat -an'
+      - 'masscan'
+  condition: selection_scan or selection_tool
+falsepositives:
+  - Supervision reseau legitime (monitoring, inventaire d'actifs)
+level: medium
+tags:
+  - attack.discovery
+  - attack.t1046

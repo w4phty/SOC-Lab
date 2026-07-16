@@ -1,0 +1,34 @@
+title: Privilege Escalation - Abus de sudo ou sudo caching
+id: 8e1a1b60-1002-4a10-9a1f-000000000005
+status: experimental
+description: |
+  Detecte des commandes sudo suspectes (spawn de shell, binaires GTFOBins
+  frequemment utilises pour un escape shell root) et l'exploitation du cache
+  d'authentification sudo (plusieurs commandes sudo rapprochees sans nouveau
+  mot de passe). Champs sourcetype "sudo" : USER->user, COMMAND->command,
+  TTY->tty, PWD->pwd.
+references:
+  - https://attack.mitre.org/techniques/T1548/003/
+logsource:
+  product: linux
+  service: sudo
+detection:
+  selection_shell_escape:
+    command|contains:
+      - '/bin/bash'
+      - '/bin/sh'
+      - 'chmod +s'
+      - 'nc -e'
+      - 'python3 -c'
+      - 'vim -c'
+      - 'less /etc/shadow'
+  timeframe: 5m
+  selection_caching:
+    null: null
+  condition: selection_shell_escape
+falsepositives:
+  - Administrateurs systeme utilisant legitimement un shell root via sudo
+level: high
+tags:
+  - attack.privilege_escalation
+  - attack.t1548.003

@@ -1,0 +1,24 @@
+title: Lateral Movement - Connexion SSH sortante vers un autre hote interne
+id: 8e1a1b60-1002-4a10-9a1f-000000000008
+status: experimental
+description: |
+  Detecte une session SSH etablie depuis un hote du lab vers un autre hote
+  interne juste apres une activite suspecte (proxy de detection : recherche du
+  mot cle "Accepted" dans le message ssh, combinee avec bash_history montrant
+  une commande "ssh" sortante). Egalement observable cote reseau via
+  zeek_conn sur le port de destination 22 (dest_port).
+references:
+  - https://attack.mitre.org/techniques/T1021/004/
+logsource:
+  product: linux
+  service: sshd
+detection:
+  selection:
+    '|raw|contains': 'Accepted'
+  condition: selection
+falsepositives:
+  - Connexions SSH administratives legitimes entre hotes du lab
+level: low
+tags:
+  - attack.lateral_movement
+  - attack.t1021.004

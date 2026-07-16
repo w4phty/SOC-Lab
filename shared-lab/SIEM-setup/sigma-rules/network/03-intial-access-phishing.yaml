@@ -1,0 +1,26 @@
+title: Initial Access - Telechargement d'executable post-clic (proxy de Phishing)
+id: 8e1a1b60-1003-4a10-9a1f-000000000003
+status: experimental
+description: |
+  T1566 (Phishing) n'est pas directement observable sans passerelle mail dans
+  ce lab (meme limite que T1598). Detection de repli : l'alerte Suricata
+  existante "Download EXE File" (sid 1000002) capture le telechargement d'un
+  executable HTTP juste apres un clic sur un lien, ce qui est un signal fort
+  et corrobore une chaine Phishing -> User Execution (T1204) -> Execution.
+  A documenter clairement comme un proxy indirect, pas une detection directe
+  du phishing lui-meme. Champs suricata : src_ip, dest_ip, alert_signature.
+references:
+  - https://attack.mitre.org/techniques/T1566/
+logsource:
+  product: suricata
+  category: ids
+detection:
+  selection:
+    alert_signature|contains: 'Download EXE File'
+  condition: selection
+falsepositives:
+  - Mise a jour logicielle legitime telechargeant un .exe
+level: medium
+tags:
+  - attack.initial_access
+  - attack.t1566

@@ -1,0 +1,27 @@
+title: Discovery - Enumeration de comptes Linux
+id: 8e1a1b60-1002-4a10-9a1f-000000000007
+status: experimental
+description: |
+  Detecte les commandes classiques d'enumeration de comptes locaux Linux.
+  Champs auditd : cmd->command_line. Combine avec bash_history (command).
+references:
+  - https://attack.mitre.org/techniques/T1087/
+logsource:
+  product: linux
+  service: auditd
+detection:
+  selection:
+    cmd|contains:
+      - 'cat /etc/passwd'
+      - 'cat /etc/shadow'
+      - 'getent passwd'
+      - 'id -a'
+      - 'w -h'
+      - 'lastlog'
+  condition: selection
+falsepositives:
+  - Scripts d'audit systeme legitimes
+level: low
+tags:
+  - attack.discovery
+  - attack.t1087

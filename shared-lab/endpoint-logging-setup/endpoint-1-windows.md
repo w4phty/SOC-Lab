@@ -66,7 +66,8 @@ The YARA pipeline detection will work as follows for this lab:
 #### Installation
 
 YARA is downloaded from `https://github.com/VirusTotal/yara/releases` and stored in the `C:\tools\yara\` directory.
-Verify the version from a Command Prompt terminal with `> yara32.exe --version`.
+The C++ runtime vc_redist.x64.exe is also required for YARA 64 bits.
+Verify the version from a Command Prompt terminal with `> yara64.exe --version`.
 
 #### YARA rules
 
@@ -137,7 +138,7 @@ $TargetFile = (
 
 if ($AllowedExt -contains [IO.Path]::GetExtension($TargetFile)) -and (Test-Path $TargetFile)
 {
-    $Result = & C:\tools\yara\yara32.exe `
+    $Result = & C:\tools\yara\yara64.exe `
         C:\tools\yara\rules\*.yar `
         $TargetFile
 

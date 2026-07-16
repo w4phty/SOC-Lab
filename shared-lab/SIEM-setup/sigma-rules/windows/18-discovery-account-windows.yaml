@@ -1,0 +1,27 @@
+title: Discovery - Enumeration de comptes Windows
+id: 8e1a1b60-1001-4a10-9a1f-00000000000a
+status: experimental
+description: |
+  Detecte les commandes classiques d'enumeration de comptes locaux/domaine.
+  Champs Sysmon : executable, command_line.
+references:
+  - https://attack.mitre.org/techniques/T1087/
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    CommandLine|contains:
+      - 'net user'
+      - 'net localgroup administrators'
+      - 'net group "domain admins"'
+      - 'whoami /groups'
+      - 'Get-ADUser'
+      - 'Get-LocalUser'
+  condition: selection
+falsepositives:
+  - Scripts d'audit IT / GPO de conformite
+level: low
+tags:
+  - attack.discovery
+  - attack.t1087

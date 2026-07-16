@@ -1,0 +1,28 @@
+title: Privilege Escalation - Ajout du bit setuid/setgid
+id: 8e1a1b60-1002-4a10-9a1f-000000000004
+status: experimental
+description: |
+  Detecte l'ajout du bit setuid/setgid sur un binaire (chmod u+s / chmod 4755)
+  ou la recherche de binaires SUID existants, technique classique
+  d'escalade de privileges Linux. Champs auditd : cmd->command_line.
+references:
+  - https://attack.mitre.org/techniques/T1548/001/
+logsource:
+  product: linux
+  service: auditd
+detection:
+  selection:
+    cmd|contains:
+      - 'chmod +s'
+      - 'chmod u+s'
+      - 'chmod 4755'
+      - 'chmod 2755'
+      - 'find / -perm -4000'
+      - 'find / -perm -u=s'
+  condition: selection
+falsepositives:
+  - Installation legitime de binaires necessitant setuid (ex. ping, sudo)
+level: high
+tags:
+  - attack.privilege_escalation
+  - attack.t1548.001

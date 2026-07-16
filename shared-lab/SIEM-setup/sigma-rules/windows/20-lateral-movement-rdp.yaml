@@ -1,0 +1,25 @@
+title: Lateral Movement - Connexion RDP entrante
+id: 8e1a1b60-1001-4a10-9a1f-00000000000b
+status: experimental
+description: |
+  Detecte une ouverture de session RDP (EventID 4624). LIMITATION IMPORTANTE :
+  le champ LogonType n'est pas mappe dans ce lab (colonne "mapped fields" vide
+  pour LogonType), il est donc impossible de filtrer precisement le type 10
+  (RemoteInteractive) : cette regle capture tout logon 4624 sur le hostname et
+  doit etre affinee. Recommandation : ajouter LogonType -> logon_type au
+  mapping Splunk pour fiabiliser cette detection.
+references:
+  - https://attack.mitre.org/techniques/T1021/001/
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4624
+  condition: selection
+falsepositives:
+  - Toute connexion interactive legitime (regle a affiner avec logon_type des que mappe)
+level: low
+tags:
+  - attack.lateral_movement
+  - attack.t1021.001

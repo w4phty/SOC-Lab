@@ -1,0 +1,36 @@
+title: PowerShell - Commande encodee ou telechargement distant
+id: 8e1a1b60-1001-4a10-9a1f-000000000001
+status: experimental
+description: |
+  Detecte l'usage de PowerShell avec une commande encodee en base64 (-EncodedCommand)
+  ou des cmdlets typiques de telechargement/execution en memoire (IEX, DownloadString).
+  Champs Splunk utilises (Sysmon Microsoft-Windows-Sysmon/Operational) : executable,
+  parent_executable, command_line, hostname, user.
+  Le champ ScriptBlockText (EventID 4104) n'est pas mappe dans le lab -> utiliser le
+  champ "message" pour une recherche texte de secours sur le meme contenu.
+references:
+  - https://attack.mitre.org/techniques/T1059/001/
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection_img:
+    Image|endswith: '\powershell.exe'
+  selection_cmd:
+    CommandLine|contains:
+      - '-EncodedCommand'
+      - '-enc '
+      - '-e '
+      - 'FromBase64String'
+      - 'DownloadString'
+      - 'IEX('
+      - 'Invoke-Expression'
+      - '-WindowStyle Hidden'
+      - '-nop'
+  condition: selection_img and selection_cmd
+falsepositives:
+  - Scripts d'administration legitimes utilisant PowerShell encode (rare en environnement de lab)
+level: high
+tags:
+  - attack.execution
+  - attack.t1059.001

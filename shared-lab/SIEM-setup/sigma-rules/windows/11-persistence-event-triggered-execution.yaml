@@ -1,0 +1,31 @@
+title: Persistence - Abonnement d'evenement WMI suspect
+id: 8e1a1b60-1001-4a10-9a1f-000000000005
+status: experimental
+description: |
+  Detecte l'utilisation de wmic ou de PowerShell pour creer un abonnement
+  d'evenement WMI permanent (Event Triggered Execution), technique de
+  persistence sans fichier. Champs Sysmon : executable, command_line.
+  Visibilite limitee dans ce lab (pas d'ETW WMI-Activity dedie) : cette regle
+  ne couvre que la ligne de commande de creation, pas l'abonnement lui-meme.
+references:
+  - https://attack.mitre.org/techniques/T1546/
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection_wmic:
+    Image|endswith: '\wmic.exe'
+    CommandLine|contains: 'eventsubscription'
+  selection_ps:
+    Image|endswith: '\powershell.exe'
+    CommandLine|contains:
+      - 'Register-WmiEvent'
+      - '__EventFilter'
+      - 'CommandLineEventConsumer'
+  condition: selection_wmic or selection_ps
+falsepositives:
+  - Outils de supervision legitimes s'appuyant sur des abonnements WMI
+level: medium
+tags:
+  - attack.persistence
+  - attack.t1546

@@ -1,0 +1,29 @@
+title: Command and Control - Trafic C2 sur protocole web
+id: 8e1a1b60-1003-4a10-9a1f-000000000005
+status: experimental
+description: |
+  Detecte deux signaux combinables : (1) les alertes Suricata categorie
+  ET MALWARE/ET TROJAN (regles communautaires Emerging Threats deja en place)
+  et (2) la fuite d'identifiants en clair via HTTP, alerte existante
+  "SOC-LAB Cleartext Credentials" (sid 1000003) qui peut accompagner une
+  exfiltration/callback C2 mal implemente cote attaquant.
+  Champs suricata : alert_signature, alert_severity, src_ip, dest_ip.
+references:
+  - https://attack.mitre.org/techniques/T1071/001/
+logsource:
+  product: suricata
+  category: ids
+detection:
+  selection_malware:
+    alert_signature|contains:
+      - 'ET MALWARE'
+      - 'ET TROJAN'
+  selection_creds:
+    alert_signature|contains: 'SOC-LAB Cleartext Credentials'
+  condition: selection_malware or selection_creds
+falsepositives:
+  - Faux positifs classiques des regles ET communautaires (a trier par severite)
+level: high
+tags:
+  - attack.command_and_control
+  - attack.t1071.001

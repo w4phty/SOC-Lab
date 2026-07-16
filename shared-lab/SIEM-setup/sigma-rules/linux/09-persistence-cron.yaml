@@ -1,0 +1,32 @@
+title: Persistence - Modification cron suspecte
+id: 8e1a1b60-1002-4a10-9a1f-000000000003
+status: experimental
+description: |
+  Detecte l'ajout d'une tache cron via crontab ou l'edition directe des
+  fichiers cron. Deux sources combinees : auditd (cmd->command_line) et
+  bash_history (command). Le champ "name" (auditd, chemin de fichier
+  manipule) permet aussi de couvrir l'edition directe de /etc/cron.d.
+references:
+  - https://attack.mitre.org/techniques/T1053/003/
+logsource:
+  product: linux
+  service: auditd
+detection:
+  selection_cmd:
+    cmd|contains:
+      - 'crontab -e'
+      - 'crontab -l'
+      - '>> /etc/crontab'
+      - '/etc/cron.d/'
+  selection_file:
+    name|contains:
+      - '/etc/cron.d/'
+      - '/etc/crontab'
+      - '/var/spool/cron/'
+  condition: selection_cmd or selection_file
+falsepositives:
+  - Administration systeme legitime planifiant des taches
+level: medium
+tags:
+  - attack.persistence
+  - attack.t1053.003

@@ -37,7 +37,7 @@ We can now create a new file in this directory for the custom rules of the lab: 
 The following rules are added to the custom.rules file:
 ```
 # Network scan detection (Discovery)
-alert tcp any any -> $HOME_NET any (msg:"SOC-LAB Possible TCP SYN Scan"; flags:S; threshold:type both, track by_src, count 20, seconds 5; sid:1000001; rev:1;)
+alert tcp any any -> $HOME_NET any (msg:"Possible TCP SYN Scan"; flags:S; threshold:type both, track by_src, count 20, seconds 5; sid:1000001; rev:1;)
 
 
 # Exe files download (Initial access)
@@ -45,7 +45,7 @@ alert http any any -> $HOME_NET any (msg:"Download EXE File"; flow:established,t
 
 
 # Cleartext credentials detection (Credentials exposure)
-alert http any any -> any any (msg:"SOC-LAB Cleartext Credentials"; http.request_body; pcre:"/(password|passwd|pwd|token)=/i"; sid:1000003; rev:1;)
+alert http any any -> any any (msg:"Cleartext Credentials"; http.request_body; pcre:"/(password|passwd|pwd|token)=/i"; sid:1000003; rev:1;)
 
 
 # DNS suspicious domains detection (Command and control, DNS extraction)
@@ -72,14 +72,14 @@ The last configuration step is to restart Suricata: `$ sudo systemctl restart su
 To verify that alerts are effectively raised in Suricata, we first need to simulate a behavior that is supposed to be detected.
 To do so, we run an Nmap scan from the Kali machine, targeting the Ubuntu endpoint:
 ```
-$ nmap -sC -sV -e eth1 10.0.0.2 
+$ nmap -sC -sV -e eth1 10.10.10.2 
 ```
 
 Verify the alerts with:
 ```
 $ cat /var/log/suricata/eve.json | grep scan
 ```
-We should see the message specified in the custom.rules file: `SOC-LAB Possible TCP SYN Scan`.
+We should see the message specified in the custom.rules file: `Possible TCP SYN Scan`.
 
 
 ## Zeek
@@ -124,10 +124,39 @@ $ tail -f conn.log
 
 Generate a ping from the Kali machine towards the Ubuntu Endpoint:
 ```
-$ ping -I eth1 10.0.0.2
+$ ping -I eth1 10.10.10.2
 ```
 
 The generated ICMP traffic appears in the conn.log file. It is also worth noting that it also appears in the Suricata logs, if any configured suricata alert matches the event occuring.
+
+## DNS Server
+
+In order for Zeek to be able to capture DNS queries on the internal network, we have to setup `dnsmasq`, on the monitoring machine.
+
+To install it, use the following commands:
+```
+$ sudo apt update
+$ sudo apt install dnsmasq -y
+```
+
+Then modify the content of the file `/etc/dnsmasq.conf` by adding:
+```
+interface=enp0s8
+bind-interfaces
+domain=lab.local
+
+address=/monitoring.lab.local/10.10.10.4
+address=/ws-01.lab.local/10.10.10.3
+address=/ws-02.lab.local/10.10.10.2
+
+log-queries
+log-facility=/var/log/dnsmasq.log
+
+no-resolv
+```
+
+Restart dnsmasq to apply the modified configuration with `$ sudo systemctl restart dnsmasq`.
+
 
 ## Splunk Forwarder
 

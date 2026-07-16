@@ -1,0 +1,31 @@
+title: Python - Backdoor ou reverse shell
+id: 8e1a1b60-1002-4a10-9a1f-000000000002
+status: experimental
+description: |
+  Detecte l'execution de python/python3 avec une ligne de commande suggerant
+  un backdoor reseau (import socket/subprocess, connect()). Correle avec la
+  regle YARA existante "Python_Backdoor_Indicators".
+  Champs auditd : exe->executable, cmd->command_line.
+references:
+  - https://attack.mitre.org/techniques/T1059/006/
+logsource:
+  product: linux
+  service: auditd
+detection:
+  selection_exe:
+    exe|endswith:
+      - '/python3'
+      - '/python'
+  selection_cmd:
+    cmd|contains:
+      - 'import socket'
+      - 'import subprocess'
+      - 'subprocess.Popen'
+      - 'connect('
+  condition: selection_exe and selection_cmd
+falsepositives:
+  - Scripts d'administration Python legitimes utilisant socket/subprocess
+level: high
+tags:
+  - attack.execution
+  - attack.t1059.006
