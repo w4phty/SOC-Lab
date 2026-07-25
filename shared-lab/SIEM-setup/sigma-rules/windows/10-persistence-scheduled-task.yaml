@@ -1,22 +1,23 @@
-title: Persistence - Creation de tache planifiee via schtasks
-id: 8e1a1b60-1001-4a10-9a1f-000000000004
+title: Persistence - Scheduled task creation
+id: dfcaf5e0-0c1a-4d20-bae7-5adfd733faa1
+x_rule_id: SPL-10
 status: experimental
 description: |
-  Detecte la creation d'une tache planifiee en ligne de commande, technique de
-  persistence classique. Champs Sysmon : executable, command_line.
+  Detects the creation of a new scheduled task. Based on Sysmon fields command_line
+  and executable.
 references:
   - https://attack.mitre.org/techniques/T1053/005/
 logsource:
   product: windows
   category: process_creation
 detection:
-  selection_img:
-    Image|endswith: '\schtasks.exe'
+  selection_exe:
+    executable|endswith: '\schtasks.exe'
   selection_cmd:
-    CommandLine|contains: '/create'
-  condition: selection_img and selection_cmd
+    command_line|contains: '/create'
+  condition: selection_exe and selection_cmd
 falsepositives:
-  - Deploiement logiciel legitime creant des taches planifiees (GPO, agents EDR)
+  - Legitimate scheduled task for admin purposes
 level: medium
 tags:
   - attack.persistence

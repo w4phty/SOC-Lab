@@ -1,11 +1,10 @@
-title: Persistence - Creation de compte utilisateur Windows
-id: 8e1a1b60-1001-4a10-9a1f-000000000006
+title: Persistence - Windows user account creation
+id: a6abdb51-cbf2-49aa-a23d-bb0bc34a06eb
+x_rule_id: SPL-12
 status: experimental
 description: |
-  Detecte la creation d'un compte utilisateur local ou de domaine (EventID 4720
-  du journal Security). Champs WinEventLog:Security : event_code, hostname.
-  Le champ Account_Name n'est pas mappe dans ce lab -> ajouter son mapping
-  Splunk (account_name) est recommande pour filtrer par nom de compte cree.
+  Detects the creation of a new user account (EventID 4720). Based on WinEventLog:Security
+  field event_code.
 references:
   - https://attack.mitre.org/techniques/T1136/
 logsource:
@@ -13,10 +12,10 @@ logsource:
   service: security
 detection:
   selection:
-    EventID: 4720
+    event_code: 4720
   condition: selection
 falsepositives:
-  - Onboarding RH / creation de compte planifiee par l'IT
+  - planned account creation
 level: medium
 tags:
   - attack.persistence

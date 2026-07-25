@@ -1,11 +1,10 @@
-title: Persistence - Modification cron suspecte
-id: 8e1a1b60-1002-4a10-9a1f-000000000003
+title: Persistence - Suspicious cron modification
+id: 3a7a1520-c76a-4d8d-a73e-6dc75298e7c5
+x_rule_id: SPL-09
 status: experimental
 description: |
-  Detecte l'ajout d'une tache cron via crontab ou l'edition directe des
-  fichiers cron. Deux sources combinees : auditd (cmd->command_line) et
-  bash_history (command). Le champ "name" (auditd, chemin de fichier
-  manipule) permet aussi de couvrir l'edition directe de /etc/cron.d.
+  Detects any new cron job via crontab or cron files edition. Based on auditd
+  fields name and command_line.
 references:
   - https://attack.mitre.org/techniques/T1053/003/
 logsource:
@@ -13,11 +12,12 @@ logsource:
   service: auditd
 detection:
   selection_cmd:
-    cmd|contains:
+    command_line|contains:
       - 'crontab -e'
       - 'crontab -l'
       - '>> /etc/crontab'
       - '/etc/cron.d/'
+      - 'crontab'
   selection_file:
     name|contains:
       - '/etc/cron.d/'
@@ -25,7 +25,7 @@ detection:
       - '/var/spool/cron/'
   condition: selection_cmd or selection_file
 falsepositives:
-  - Administration systeme legitime planifiant des taches
+  - Legitimate admin planned cron jobs
 level: medium
 tags:
   - attack.persistence

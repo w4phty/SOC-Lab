@@ -1,12 +1,10 @@
-title: User Execution - Chaine de processus suspecte depuis une application utilisateur
-id: 8e1a1b60-1001-4a10-9a1f-000000000003
+title: User Execution - Suspicious process chain
+id: 39fba7a7-0b5c-4cb2-9b64-6e6e8289efe6
+x_rule_id: SPL-08
 status: experimental
 description: |
-  Detecte un processus enfant inhabituel (powershell, cmd, wscript, mshta) lance par
-  une application utilisee pour ouvrir un lien/fichier/image malveillant (navigateur,
-  client mail, lecteur PDF, Office). Correle idealement avec l'alerte Suricata
-  "Download EXE File" (sid 1000002) survenue juste avant sur le meme hote.
-  Champs Sysmon : parent_executable, executable, command_line, hostname.
+  Detects an unusual child process launched by a software to open a malicious file, link
+  or image.
 references:
   - https://attack.mitre.org/techniques/T1204/
 logsource:
@@ -14,7 +12,7 @@ logsource:
   category: process_creation
 detection:
   selection_parent:
-    ParentImage|endswith:
+    parent_executable|endswith:
       - '\outlook.exe'
       - '\chrome.exe'
       - '\firefox.exe'
@@ -23,7 +21,7 @@ detection:
       - '\excel.exe'
       - '\acrord32.exe'
   selection_child:
-    Image|endswith:
+    executable|endswith:
       - '\powershell.exe'
       - '\cmd.exe'
       - '\wscript.exe'
@@ -31,7 +29,7 @@ detection:
       - '\rundll32.exe'
   condition: selection_parent and selection_child
 falsepositives:
-  - Macro/complement legitime declenchant un script d'entreprise connu
+  - Legitimate macro lauching known script
 level: high
 tags:
   - attack.execution

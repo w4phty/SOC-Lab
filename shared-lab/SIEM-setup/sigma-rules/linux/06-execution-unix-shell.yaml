@@ -1,11 +1,10 @@
-title: Unix Shell - Reverse shell bash
-id: 8e1a1b60-1002-4a10-9a1f-000000000001
+title: Execution - Bash reverse shell
+id: 7cfaca8b-c223-4348-ba7c-1166f1d36a03
+x_rule_id: SPL-06
 status: experimental
 description: |
-  Detecte les patterns classiques de reverse shell bash. Combine deux sources :
-  auditd (champs exe->executable, comm->comm, cmd->command_line) et la regle
-  YARA existante "Linux_Reverse_Shell_Indicators" dont l'alerte est disponible
-  via le champ alert (sourcetype yara Ubuntu).
+  Detects classic patterns of bash reverse shell. Based on auditd logs, 
+  using fields command_line and process_name.
 references:
   - https://attack.mitre.org/techniques/T1059/004/
 logsource:
@@ -13,15 +12,15 @@ logsource:
   service: auditd
 detection:
   selection:
-    comm: 'bash'
-    cmd|contains:
+    process_name: 'bash'
+    command_line|contains:
       - '/dev/tcp/'
       - 'bash -i'
       - '0>&1'
       - 'nc -e'
   condition: selection
 falsepositives:
-  - Scripts d'administration reseau legitimes utilisant /dev/tcp (rare)
+  - Legitimate admin script involving /dev/tcp
 level: critical
 tags:
   - attack.execution

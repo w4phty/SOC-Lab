@@ -1,12 +1,9 @@
-title: Reconnaissance - Scan de ports TCP SYN
-id: 8e1a1b60-1003-4a10-9a1f-000000000001
+title: Reconnaissance - TCP SYN port scan
+id: 031fe431-9cd8-45ca-b65d-7a4198f5f843
+x_rule_id: SPL-01
 status: experimental
 description: |
-  Reprend l'alerte Suricata existante "SOC-LAB Possible TCP SYN Scan"
-  (sid 1000001) qui detecte deja le seuil (20 SYN en 5s depuis une meme
-  source). Ce fichier Sigma sert de couche de correlation/traçabilite MITRE
-  au-dessus de l'alerte Suricata brute. Champs Splunk suricata : src_ip,
-  dest_ip, alert_signature, alert_severity.
+  Based on suricata alert "Possible TCP SYN Scan"
 references:
   - https://attack.mitre.org/techniques/T1595/
 logsource:
@@ -14,10 +11,10 @@ logsource:
   category: ids
 detection:
   selection:
-    alert_signature|contains: 'SOC-LAB Possible TCP SYN Scan'
+    alert_signature|contains: 'Possible TCP SYN Scan'
   condition: selection
 falsepositives:
-  - Scan de vulnerabilites autorise (Nessus/OpenVAS planifie)
+  - Allowed vulnerability scans such as planned Nessus scan
 level: medium
 tags:
   - attack.reconnaissance

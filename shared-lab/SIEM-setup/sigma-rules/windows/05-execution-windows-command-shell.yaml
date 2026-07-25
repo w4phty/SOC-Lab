@@ -1,20 +1,20 @@
-title: Windows Command Shell - Enumeration ou chainage suspect
-id: 8e1a1b60-1001-4a10-9a1f-000000000002
+title: Execution - Windows Command Shell
+id: ba2b0f31-3eff-461b-a537-8a0e070ce817
+x_rule_id: SPL-05
 status: experimental
 description: |
-  Detecte cmd.exe lance avec des commandes d'enumeration ou de chainage typiques
-  d'une main-en-clavier post-compromission (whoami, net user, systeminfo, tasklist,
-  ou pipe vers findstr/more). Champs Sysmon : executable, parent_executable, command_line.
+  Detects cmd.exe launched with post initial access enumeration commands. Based on
+  Sysmon fields executable and command_line.
 references:
   - https://attack.mitre.org/techniques/T1059/003/
 logsource:
   product: windows
   category: process_creation
 detection:
-  selection_img:
-    Image|endswith: '\cmd.exe'
+  selection_exe:
+    executable|endswith: '\cmd.exe'
   selection_cmd:
-    CommandLine|contains:
+    command_line|contains:
       - 'whoami /all'
       - 'net user /domain'
       - 'net group "domain admins"'
@@ -22,9 +22,9 @@ detection:
       - 'tasklist /v'
       - '& echo'
       - '/c powershell'
-  condition: selection_img and selection_cmd
+  condition: selection_exe and selection_cmd
 falsepositives:
-  - Scripts de collecte d'inventaire IT legitimes
+  - IT legitimate inventory commands
 level: medium
 tags:
   - attack.execution

@@ -1,12 +1,11 @@
-title: Privilege Escalation - Abus de sudo ou sudo caching
-id: 8e1a1b60-1002-4a10-9a1f-000000000005
+title: Privilege Escalation - Sudo
+id: 114948fc-10f8-4901-85f9-bf42c8ea189f
+x_rule_id: SPL-14
 status: experimental
 description: |
-  Detecte des commandes sudo suspectes (spawn de shell, binaires GTFOBins
-  frequemment utilises pour un escape shell root) et l'exploitation du cache
-  d'authentification sudo (plusieurs commandes sudo rapprochees sans nouveau
-  mot de passe). Champs sourcetype "sudo" : USER->user, COMMAND->command,
-  TTY->tty, PWD->pwd.
+  Detects suspicious sudo commands (shell spawn, such as GTFOBins binaries
+  which use shell root escape), or exploiting sudo cache authentication. Based 
+  on sudo fields command_line and user.
 references:
   - https://attack.mitre.org/techniques/T1548/003/
 logsource:
@@ -14,7 +13,7 @@ logsource:
   service: sudo
 detection:
   selection_shell_escape:
-    command|contains:
+    command_line|contains:
       - '/bin/bash'
       - '/bin/sh'
       - 'chmod +s'
@@ -22,12 +21,12 @@ detection:
       - 'python3 -c'
       - 'vim -c'
       - 'less /etc/shadow'
+  selection_all_sudo:
+    command_line|exists: true
   timeframe: 5m
-  selection_caching:
-    null: null
-  condition: selection_shell_escape
+  condition: selection_shell_escape or selection_all_sudo | count() by user >= 5
 falsepositives:
-  - Administrateurs systeme utilisant legitimement un shell root via sudo
+  - Admin system using legitimate root shell via sudo
 level: high
 tags:
   - attack.privilege_escalation

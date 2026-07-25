@@ -1,12 +1,10 @@
-title: Lateral Movement - Connexion SSH sortante vers un autre hote interne
-id: 8e1a1b60-1002-4a10-9a1f-000000000008
+title: Lateral Movement - outbound SSH Connection
+id: f3404019-e217-4cc9-b19d-3fd5d6a5f817
+x_rule_id: SPL-21
 status: experimental
 description: |
-  Detecte une session SSH etablie depuis un hote du lab vers un autre hote
-  interne juste apres une activite suspecte (proxy de detection : recherche du
-  mot cle "Accepted" dans le message ssh, combinee avec bash_history montrant
-  une commande "ssh" sortante). Egalement observable cote reseau via
-  zeek_conn sur le port de destination 22 (dest_port).
+  Detects an established SSH connexion from one host to another on the internal network. 
+  Based on sshd field authentication_action.
 references:
   - https://attack.mitre.org/techniques/T1021/004/
 logsource:
@@ -14,10 +12,10 @@ logsource:
   service: sshd
 detection:
   selection:
-    '|raw|contains': 'Accepted'
+    authentication_action|contains: 'Accepted password'
   condition: selection
 falsepositives:
-  - Connexions SSH administratives legitimes entre hotes du lab
+  - Legitimate SSH connexion between hosts
 level: low
 tags:
   - attack.lateral_movement

@@ -1,28 +1,22 @@
-title: Command and Control - Trafic C2 sur protocole web
-id: 8e1a1b60-1003-4a10-9a1f-000000000005
+title: Command and Control - C2 web traffic
+id: 2683bc20-d66f-4950-bc14-6a9c2839883b
+x_rule_id: SPL-23
 status: experimental
 description: |
-  Detecte deux signaux combinables : (1) les alertes Suricata categorie
-  ET MALWARE/ET TROJAN (regles communautaires Emerging Threats deja en place)
-  et (2) la fuite d'identifiants en clair via HTTP, alerte existante
-  "SOC-LAB Cleartext Credentials" (sid 1000003) qui peut accompagner une
-  exfiltration/callback C2 mal implemente cote attaquant.
-  Champs suricata : alert_signature, alert_severity, src_ip, dest_ip.
+  Detects the exposure of cleartext credentials, which can be a sign of C2
+  exfiltration not implemented properly, but also credential harvesting. Based on suricata
+  alert "Cleartext Credentials".
 references:
   - https://attack.mitre.org/techniques/T1071/001/
 logsource:
   product: suricata
   category: ids
 detection:
-  selection_malware:
-    alert_signature|contains:
-      - 'ET MALWARE'
-      - 'ET TROJAN'
-  selection_creds:
-    alert_signature|contains: 'SOC-LAB Cleartext Credentials'
-  condition: selection_malware or selection_creds
+  selection:
+    alert_signature|contains: 'Cleartext Credentials'
+  condition: selection
 falsepositives:
-  - Faux positifs classiques des regles ET communautaires (a trier par severite)
+  - legitimate data sent over the network
 level: high
 tags:
   - attack.command_and_control

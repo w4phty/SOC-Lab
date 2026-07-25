@@ -1,0 +1,21 @@
+title: Execution - Python Backdoor
+id: 02de2b02-ea38-439a-8099-a9d987d509c7
+x_rule_id: SPL-27
+status: experimental
+description: |
+  YARA rule detecting python backdoor indicators.
+references:
+  - https://attack.mitre.org/techniques/T1059/006/
+logsource:
+  product: linux
+  service: yara
+detection:
+  selection:
+    alert_name|contains: 'Python_Backdoor_Indicators'
+  condition: selection
+falsepositives:
+  - Legitimate admin scripts using python socket/subprocess
+level: high
+tags:
+  - attack.execution
+  - attack.t1059.006

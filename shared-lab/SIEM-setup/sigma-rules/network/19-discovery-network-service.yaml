@@ -1,30 +1,22 @@
-title: Discovery - Reconnaissance de services reseau
-id: 8e1a1b60-1003-4a10-9a1f-000000000004
+title: Discovery - Network service discovery
+id: 423b4887-328e-439d-bbf4-263169a10ad5
+x_rule_id: SPL-19
 status: experimental
 description: |
-  Reutilise l'alerte Suricata de scan (sid 1000001) en tant que signal
-  Discovery lorsque la source du scan est un hote interne (mouvement
-  laterale/discovery post-compromission), a distinguer de T1595 qui vise un
-  scan externe vers le lab. Ajoute une correlation Sysmon/auditd sur les
-  outils d'enumeration (nmap, netstat) lances localement.
-  Champs suricata : src_ip, dest_ip, alert_signature.
-  Champs Sysmon/auditd : command_line.
+  Based on suricata alert "Possible TCP SYN Scan". This reuses the same alert as 
+  SPL-01. Correlation with other logs will be necessary to determine the type of scanning
+  used when this alert is raised.
 references:
   - https://attack.mitre.org/techniques/T1046/
 logsource:
   product: suricata
   category: ids
 detection:
-  selection_scan:
-    alert_signature|contains: 'SOC-LAB Possible TCP SYN Scan'
-  selection_tool:
-    command_line|contains:
-      - 'nmap '
-      - 'netstat -an'
-      - 'masscan'
-  condition: selection_scan or selection_tool
+  selection:
+    alert_signature|contains: 'Possible TCP SYN Scan'
+  condition: selection
 falsepositives:
-  - Supervision reseau legitime (monitoring, inventaire d'actifs)
+  - Legitimate scans, monitoring purposes
 level: medium
 tags:
   - attack.discovery

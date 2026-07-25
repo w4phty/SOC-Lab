@@ -1,15 +1,10 @@
-title: Reconnaissance - Phishing for Information (NON COUVERT)
-id: 8e1a1b60-1003-4a10-9a1f-000000000002
+title: Reconnaissance - Phishing for Information
+id: 9d7df1b3-4467-42a2-8364-283d1f5a162c
+x_rule_id: SPL-02
 status: unsupported
 description: |
-  T1598 (Phishing for Information) vise la collecte d'informations par
-  hameconnage cote victime, typiquement observable via des logs de
-  passerelle mail (headers, pieces jointes, expediteur usurpe) ou un EDR de
-  poste de travail avec visibilite navigateur/mail. Aucune de ces sources
-  n'existe dans ce lab (pas de serveur mail, pas d'EDR). Cette technique est
-  documentee ici comme un GAP DE VISIBILITE assume plutot que forcee avec une
-  detection peu fiable. Amelioration possible : ajouter un serveur mail
-  (ex. Zimbra/Postfix) avec logs forwardes pour couvrir ce cas.
+  Detects information harvesting usually through email and social engineering. 
+  This is not covered in this lab, since no mail server with log forwarding is set up.
 references:
   - https://attack.mitre.org/techniques/T1598/
 logsource:

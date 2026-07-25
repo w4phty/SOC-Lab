@@ -1,9 +1,9 @@
-title: Discovery - Enumeration de comptes Linux
-id: 8e1a1b60-1002-4a10-9a1f-000000000007
+title: Discovery - Linux account enumeration
+id: 96d0a298-2714-4842-95a5-db4b7eaaca78
+x_rule_id: SPL-18
 status: experimental
 description: |
-  Detecte les commandes classiques d'enumeration de comptes locaux Linux.
-  Champs auditd : cmd->command_line. Combine avec bash_history (command).
+  Detects common enumeration method for local linux accounts. Based on auditd field command_line.
 references:
   - https://attack.mitre.org/techniques/T1087/
 logsource:
@@ -11,16 +11,16 @@ logsource:
   service: auditd
 detection:
   selection:
-    cmd|contains:
-      - 'cat /etc/passwd'
-      - 'cat /etc/shadow'
+    command_line|contains:
+      - '/etc/passwd'
+      - '/etc/shadow'
       - 'getent passwd'
       - 'id -a'
       - 'w -h'
       - 'lastlog'
   condition: selection
 falsepositives:
-  - Scripts d'audit systeme legitimes
+  - Legitimate system audit scripts
 level: low
 tags:
   - attack.discovery

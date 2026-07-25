@@ -1,12 +1,10 @@
-title: Command and Control - Tunneling ou C2 via DNS
-id: 8e1a1b60-1003-4a10-9a1f-000000000006
+title: Command and Control - DNS Tunneling or C2
+id: 6c7c1bcc-9c31-4fed-a9b2-bd2051de9633
+x_rule_id: SPL-24
 status: experimental
 description: |
-  Reprend les trois alertes Suricata DNS existantes qui couvrent ensemble ce
-  cas d'usage : domaines DGA (sid 1000004), sous-domaines anormalement longs
-  (sid 1000005) et tunneling base64 (sid 1000006). Correlation possible avec
-  zeek_dns (query, record_type) pour confirmer le volume de requetes vers le
-  meme domaine parent. Champs suricata : alert_signature, src_ip, dest_ip.
+  Based on DNS Suricata alerts detecting: DGA domains, long subdomains, and base64
+  tunneling.
 references:
   - https://attack.mitre.org/techniques/T1071/004/
 logsource:
@@ -20,7 +18,7 @@ detection:
       - 'Possible base64 tunneling'
   condition: selection
 falsepositives:
-  - CDN/services cloud utilisant des sous-domaines longs generes (a whitelister au cas par cas)
+  - cloud services using long subdomains
 level: high
 tags:
   - attack.command_and_control

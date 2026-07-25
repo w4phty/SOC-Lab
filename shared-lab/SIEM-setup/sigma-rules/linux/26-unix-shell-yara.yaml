@@ -1,0 +1,21 @@
+title: Execution - Reverse Shell
+id: 8423de65-4aa3-4ca8-807a-989acb164c13
+x_rule_id: SPL-26
+status: experimental
+description: |
+  YARA rule detecting linux reverse shell indicators.
+references:
+  - https://attack.mitre.org/techniques/T1059/004/
+logsource:
+  product: linux
+  service: yara
+detection:
+  selection:
+    alert_name|contains: 'Linux_Reverse_Shell_Indicators'
+  condition: selection
+falsepositives:
+  - Legitimate admin script involving /dev/tcp
+level: critical
+tags:
+  - attack.execution
+  - attack.t1059.004

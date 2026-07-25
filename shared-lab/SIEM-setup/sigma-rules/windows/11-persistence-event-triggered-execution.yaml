@@ -1,12 +1,10 @@
-title: Persistence - Abonnement d'evenement WMI suspect
-id: 8e1a1b60-1001-4a10-9a1f-000000000005
+title: Persistence - Wmic or powershell subscription events
+id: 716e00cd-8006-445f-abd2-2f0f9954684a
+x_rule_id: SPL-11
 status: experimental
 description: |
-  Detecte l'utilisation de wmic ou de PowerShell pour creer un abonnement
-  d'evenement WMI permanent (Event Triggered Execution), technique de
-  persistence sans fichier. Champs Sysmon : executable, command_line.
-  Visibilite limitee dans ce lab (pas d'ETW WMI-Activity dedie) : cette regle
-  ne couvre que la ligne de commande de creation, pas l'abonnement lui-meme.
+  Detects usage of wmic or powershell for creating an event subscription, as a persistence
+  technique. Based on Sysmon fields executable and command_line.
 references:
   - https://attack.mitre.org/techniques/T1546/
 logsource:
@@ -14,17 +12,17 @@ logsource:
   category: process_creation
 detection:
   selection_wmic:
-    Image|endswith: '\wmic.exe'
-    CommandLine|contains: 'eventsubscription'
+    executable|endswith: '\wmic.exe'
+    command_line|contains: 'eventsubscription'
   selection_ps:
-    Image|endswith: '\powershell.exe'
-    CommandLine|contains:
+    executable|endswith: '\powershell.exe'
+    command_line|contains:
       - 'Register-WmiEvent'
       - '__EventFilter'
       - 'CommandLineEventConsumer'
   condition: selection_wmic or selection_ps
 falsepositives:
-  - Outils de supervision legitimes s'appuyant sur des abonnements WMI
+  - legitimate supervision tools
 level: medium
 tags:
   - attack.persistence

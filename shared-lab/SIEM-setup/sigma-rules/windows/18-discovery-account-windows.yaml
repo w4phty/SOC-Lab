@@ -1,9 +1,9 @@
-title: Discovery - Enumeration de comptes Windows
-id: 8e1a1b60-1001-4a10-9a1f-00000000000a
+title: Discovery - Windows account enumeration
+id: 96d0a298-2714-4842-95a5-db4b7eaaca78
+x_rule_id: SPL-18
 status: experimental
 description: |
-  Detecte les commandes classiques d'enumeration de comptes locaux/domaine.
-  Champs Sysmon : executable, command_line.
+  Detects common enumeration methods. Based on Sysmon field command_line.
 references:
   - https://attack.mitre.org/techniques/T1087/
 logsource:
@@ -11,7 +11,7 @@ logsource:
   category: process_creation
 detection:
   selection:
-    CommandLine|contains:
+    command_line|contains:
       - 'net user'
       - 'net localgroup administrators'
       - 'net group "domain admins"'
@@ -20,7 +20,7 @@ detection:
       - 'Get-LocalUser'
   condition: selection
 falsepositives:
-  - Scripts d'audit IT / GPO de conformite
+  - Legitimate audit IT scripts
 level: low
 tags:
   - attack.discovery

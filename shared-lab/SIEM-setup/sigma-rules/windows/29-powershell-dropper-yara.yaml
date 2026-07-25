@@ -1,0 +1,21 @@
+title: Execution - PowerShell Dropper
+id: 389d33e5-02ac-4d73-b366-5ad1fdbbc9eb
+x_rule_id: SPL-29
+status: experimental
+description: |
+  YARA rule detecting powershell dropper.
+references:
+  - https://attack.mitre.org/techniques/T1059/001/
+logsource:
+  product: windows
+  service: yara
+detection:
+  selection:
+    alert_name|contains: 'PowerShell_Dropper_Indicators'
+  condition: selection
+falsepositives:
+  - very few possibilities of false positives
+level: high
+tags:
+  - attack.execution
+  - attack.t1059.001
