@@ -9,7 +9,7 @@ references:
   - https://attack.mitre.org/techniques/T1550/
 logsource:
   product: windows
-  category: process_creation
+  service: process_creation
 detection:
   selection:
     command_line|contains:

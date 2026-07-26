@@ -5,14 +5,14 @@ status: experimental
 description: |
   Detects suspicious sudo commands (shell spawn, such as GTFOBins binaries
   which use shell root escape), or exploiting sudo cache authentication. Based 
-  on sudo fields command_line and user.
+  on sudo field command_line.
 references:
   - https://attack.mitre.org/techniques/T1548/003/
 logsource:
   product: linux
   service: sudo
 detection:
-  selection_shell_escape:
+  selection:
     command_line|contains:
       - '/bin/bash'
       - '/bin/sh'
@@ -21,10 +21,7 @@ detection:
       - 'python3 -c'
       - 'vim -c'
       - 'less /etc/shadow'
-  selection_all_sudo:
-    command_line|exists: true
-  timeframe: 5m
-  condition: selection_shell_escape or selection_all_sudo | count() by user >= 5
+  condition: selection
 falsepositives:
   - Admin system using legitimate root shell via sudo
 level: high

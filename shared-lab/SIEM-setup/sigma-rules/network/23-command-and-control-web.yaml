@@ -9,8 +9,8 @@ description: |
 references:
   - https://attack.mitre.org/techniques/T1071/001/
 logsource:
-  product: suricata
-  category: ids
+  product: monitoring
+  service: suricata
 detection:
   selection:
     alert_signature|contains: 'Cleartext Credentials'
