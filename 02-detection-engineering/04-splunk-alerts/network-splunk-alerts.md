@@ -11,7 +11,9 @@ alert_signature="*Possible TCP SYN Scan*"
     rule_id="SPL-01",
     mitre_technique="T1595",
     severity="medium",
-    sigma_id="031fe431-9cd8-45ca-b65d-7a4198f5f843"
+    sigma_id="031fe431-9cd8-45ca-b65d-7a4198f5f843",
+    platform="Network",
+    datasource="Suricata"
 | collect index=siem_alerts 
 ```
 
@@ -27,7 +29,9 @@ alert_signature="*Download EXE File*"
     rule_id="SPL-03",
     mitre_technique="T1566",
     severity="medium",
-    sigma_id="af7ff266-98a5-4ef3-a94c-b6502f7ea96a"
+    sigma_id="af7ff266-98a5-4ef3-a94c-b6502f7ea96a",
+    platform="Network",
+    datasource="Suricata"
 | collect index=siem_alerts 
 ```
 
@@ -43,7 +47,9 @@ alert_signature="*Possible TCP SYN Scan*"
     rule_id="SPL-19",
     mitre_technique="T1046",
     severity="medium",
-    sigma_id="423b4887-328e-439d-bbf4-263169a10ad5"
+    sigma_id="423b4887-328e-439d-bbf4-263169a10ad5",
+    platform="Network",
+    datasource="Suricata"
 | collect index=siem_alerts 
 ```
 
@@ -59,7 +65,9 @@ alert_signature="*Cleartext Credentials*"
     rule_id="SPL-23",
     mitre_technique="T1071.001",
     severity="high",
-    sigma_id="2683bc20-d66f-4950-bc14-6a9c2839883b"
+    sigma_id="2683bc20-d66f-4950-bc14-6a9c2839883b",
+    platform="Network",
+    datasource="Suricata"
 | collect index=siem_alerts 
 ```
 
@@ -79,7 +87,9 @@ index="monitoring" sourcetype="suricata"
     rule_id="SPL-24",
     mitre_technique="T1071.004",
     severity="high",
-    sigma_id="6c7c1bcc-9c31-4fed-a9b2-bd2051de9633"
+    sigma_id="6c7c1bcc-9c31-4fed-a9b2-bd2051de9633",
+    platform="Network",
+    datasource="Suricata"
 | collect index=siem_alerts 
 ```
 
@@ -95,6 +105,8 @@ index="monitoring" sourcetype="zeek_conn"
     rule_id="SPL-25",
     mitre_technique="T1567",
     severity="medium",
-    sigma_id="1f854909-8ff8-4200-b039-37327f6e4468"
+    sigma_id="1f854909-8ff8-4200-b039-37327f6e4468",
+    platform="Network",
+    datasource="Zeek"
 | collect index=siem_alerts 
 ```

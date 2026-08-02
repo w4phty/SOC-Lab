@@ -61,6 +61,24 @@ et des regex dans transforms.conf (lien vers une copie du fichier)
 4. transformation des règles sigma en règles splunk
 -> script d'automatisation custom sigma -> splunk
 -> enregistrement des alertes dans splunk
+Schedule : toutes les 5 minutes
+Time range : Last 5 minutes
+Trigger condition : Number of Results > 0
+Trigger : Once (une seule fois par exécution de la recherche)
+-> avec splunk free pas possible d'enregistrer des alertes récurrente
+méthode: enregistrer un report, le lancer avec un timerange correspondant au début de l'attaque pour éviter les doublons
+lien fichiers spl qui contiennent les reports
+
+à la fin des reports:
+| eval _raw="alert_name=\"".alert_name."\" rule_id=\"".rule_id."\" mitre_technique=\"".mitre_technique."\" severity=\"".severity."\" sigma_id=\"".sigma_id."\" platform=\"".platform."\" datasource=\"".datasource."\""
+| collect index=siem_alerts
+et besoin d'ajouter des regex pour lire les champs
+
+!!! ajouter le mapping des timestamp pour les avoir dans les alertes
+
+ici alertes arrivent dans stash, ok pour lab mais en environnement réel, il faudrait une vraie datasource
+
+ajouter screenshot alert fields
 
 5. tests de toutes les règles et vérification de la remontée des alertes
 

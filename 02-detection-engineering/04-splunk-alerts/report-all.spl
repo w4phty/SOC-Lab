@@ -1,0 +1,530 @@
+index="linux_os" sourcetype="linux_audit"
+(process_name="bash" AND (
+    command_line="*/dev/tcp/*"
+    OR command_line="*bash -i*"
+    OR command_line="*0>&1*"
+    OR command_line="*nc -e*"
+))
+| eval alert_name="Execution - Bash reverse shell",
+    rule_id="SPL-06",
+    mitre_technique="T1059.004",
+    severity="critical",
+    sigma_id="7cfaca8b-c223-4348-ba7c-1166f1d36a03",
+    platform="Linux",
+    datasource="Audit",
+    formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
+    time=_time
+| append
+[
+    search index="linux_os" sourcetype="linux_audit"
+(
+    executable="*/python3"
+    OR executable="*/python"
+)
+AND
+(
+    command_line="*import socket*"
+    OR command_line="*import subprocess*"
+    OR command_line="*subprocess.Popen*"
+    OR command_line="*connect(*"
+)
+| eval alert_name="Execution - Backdoor or reverse shell",
+    rule_id="SPL-07",
+    mitre_technique="T1059.006",
+    severity="high",
+    sigma_id="d61b394c-7428-467d-95f7-a944eee888ef",
+    platform="Linux",
+    datasource="Audit",
+    formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
+    time=_time]
+| append
+[
+    search index="linux_os" sourcetype="linux_audit"
+(
+    command_line="*crontab -e*"
+    OR command_line="*crontab -l*"
+    OR command_line="*>> /etc/crontab*"
+    OR command_line="*/etc/cron.d/*"
+    OR command_line="*crontab*"
+)
+OR
+(
+    name="*/etc/cron.d/*"
+    OR name="*/etc/crontab*"
+    OR name="*/var/spool/cron/*"
+)
+| eval alert_name="Persistence - Suspicious cron modification",
+    rule_id="SPL-09",
+    mitre_technique="T1053.003",
+    severity="medium",
+    sigma_id="3a7a1520-c76a-4d8d-a73e-6dc75298e7c5",
+    platform="Linux",
+    datasource="Audit",
+    formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
+    time=_time]
+| append
+[
+    search index="linux_os" sourcetype="linux_audit"
+(
+    command_line="*chmod +s*"
+    OR command_line="*chmod u+s*"
+    OR command_line="*chmod 4755*"
+    OR command_line="*chmod 2755*"
+    OR command_line="*find / -perm -4000*"
+    OR command_line="*find / -perm -u=s*"
+)
+| eval alert_name="Privilege Escalation - setuid/setgid",
+    rule_id="SPL-13",
+    mitre_technique="T1548.001",
+    severity="high",
+    sigma_id="0fae9ca7-b70b-403d-983e-d59b001818c8",
+    platform="Linux",
+    datasource="Audit",
+    formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
+    time=_time]
+| append
+[
+    search index="linux_os" sourcetype="sudo"
+(
+    command_line="*/bin/bash*"
+    OR command_line="*/bin/sh*"
+    OR command_line="*chmod +s*"
+    OR command_line="*nc -e*"
+    OR command_line="*python3 -c*"
+    OR command_line="*vim -c*"
+    OR command_line="*less /etc/shadow*"
+)
+| eval alert_name="Privilege Escalation - Sudo",
+    rule_id="SPL-14",
+    mitre_technique="T1548.003",
+    severity="high",
+    sigma_id="114948fc-10f8-4901-85f9-bf42c8ea189f",
+    platform="Linux",
+    datasource="Sudo",
+    formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
+    time=_time]
+| append
+[
+    search index="linux_os" sourcetype="sshd"
+authentication_action="*Failed password*"
+| bin _time span=5m
+| stats count by user _time
+| where count > 10
+| eval alert_name="Credential Access - SSH Bruteforce",
+    rule_id="SPL-16",
+    mitre_technique="T1110",
+    severity="high",
+    sigma_id="e518646b-495a-457f-8fa9-1fbb5bf76f2c",
+    platform="Linux",
+    datasource="Sshd",
+    formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
+    time=_time]
+| append
+[
+    search index="linux_os" sourcetype="linux_audit"
+(
+    command_line="*/etc/passwd*"
+    OR command_line="*/etc/shadow*"
+    OR command_line="*getent passwd*"
+    OR command_line="*id -a*"
+    OR command_line="*w -h*"
+    OR command_line="*lastlog*"
+)
+| eval alert_name="Discovery - Linux account enumeration",
+    rule_id="SPL-18",
+    mitre_technique="T1087",
+    severity="low",
+    sigma_id="96d0a298-2714-4842-95a5-db4b7eaaca78",
+    platform="Linux",
+    datasource="Audit",
+    formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
+    time=_time]
+| append
+[
+    search index="linux_os" sourcetype="sshd"
+authentication_action="*Accepted password*"
+| eval alert_name="Lateral Movement - outbound SSH Connection",
+    rule_id="SPL-21",
+    mitre_technique="T1021.004",
+    severity="low",
+    sigma_id="f3404019-e217-4cc9-b19d-3fd5d6a5f817",
+    platform="Linux",
+    datasource="Sshd",
+    formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
+    time=_time]
+| append
+[
+    search index="linux_os" sourcetype="yara"
+alert_name="*Linux_Reverse_Shell_Indicators*"
+| eval alert_name="Execution - Reverse Shell",
+    rule_id="SPL-26",
+    mitre_technique="T1059.004",
+    severity="critical",
+    sigma_id="8423de65-4aa3-4ca8-807a-989acb164c13",
+    platform="Linux",
+    datasource="YARA",
+    formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
+    time=_time]
+| append
+[
+    search index="linux_os" sourcetype="yara"
+alert_name="*Python_Backdoor_Indicators*"
+| eval alert_name="Execution - Python Backdoor",
+    rule_id="SPL-27",
+    mitre_technique="T1059.006",
+    severity="high",
+    sigma_id="02de2b02-ea38-439a-8099-a9d987d509c7",
+    platform="Linux",
+    datasource="YARA",
+    formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
+    time=_time]
+| append
+[ 
+    search index="windows_os" sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational"
+executable="*\powershell.exe"
+AND
+(
+    command_line="*-EncodedCommand*"
+    OR command_line="*-enc *"
+    OR command_line="*-e *"
+    OR command_line="*FromBase64String*"
+    OR command_line="*DownloadString*"
+    OR command_line="*IEX(*"
+    OR command_line="*Invoke-Expression*"
+    OR command_line="*-WindowStyle Hidden*"
+    OR command_line="*-nop*"
+)
+| eval alert_name="Execution - Powershell encoded commands or downloads",
+    rule_id="SPL-04",
+    mitre_technique="T1059.001",
+    severity="high",
+    sigma_id="5710827d-9730-451b-8832-c19ef151a2bb",
+    platform="Windows",
+    datasource="Sysmon",
+    formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
+    time=_time]
+| append
+[
+    search index="windows_os" sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational"
+executable="*\cmd.exe"
+AND
+(
+    command_line="*whoami /all*"
+    OR command_line="*net user /domain*"
+    OR command_line="*net group "domain admins"*"
+    OR command_line="*systeminfo*"
+    OR command_line="*tasklist /v*"
+    OR command_line="*& echo*"
+    OR command_line="*/c powershell*"
+)
+| eval alert_name="Execution - Windows Command Shell",
+    rule_id="SPL-05",
+    mitre_technique="T1059.003",
+    severity="medium",
+    sigma_id="ba2b0f31-3eff-461b-a537-8a0e070ce817",
+    platform="Windows",
+    datasource="Sysmon",
+    formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
+    time=_time]
+| append
+[
+    search index="windows_os" sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational"
+(
+    parent_executable="*\outlook.exe"
+    OR parent_executable="*\chrome.exe"
+    OR parent_executable="*\firefox.exe"
+    OR parent_executable="*\msedge.exe"
+    OR parent_executable="*\winword.exe"
+    OR parent_executable="*\excel.exe"
+    OR parent_executable="*\acrord32.exe"
+)
+AND
+(
+    executable="*\powershell.exe"
+    OR executable="*\cmd.exe"
+    OR executable="*\wscript.exe"
+    OR executable="*\mshta.exe"
+    OR executable="*\rundll32.exe"
+)
+| eval alert_name="User Execution - Suspicious process chain",
+    rule_id="SPL-08",
+    mitre_technique="T1204",
+    severity="high",
+    sigma_id="39fba7a7-0b5c-4cb2-9b64-6e6e8289efe6",
+    platform="Windows",
+    datasource="Sysmon",
+    formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
+    time=_time]
+| append
+[
+    search index="windows_os" sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational"
+executable="*\schtasks.exe"
+AND
+command_line="*/create*"
+| eval alert_name="Persistence - Scheduled task creation",
+    rule_id="SPL-10",
+    mitre_technique="T1053.005",
+    severity="medium",
+    sigma_id="dfcaf5e0-0c1a-4d20-bae7-5adfd733faa1",
+    platform="Windows",
+    datasource="Sysmon",
+    formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
+    time=_time]
+| append
+[
+    search index="windows_os" sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational"
+(executable="*\wmic.exe" AND command_line="*eventsubscription*")
+OR
+(executable="*\powershell.exe" AND (
+    command_line="*Register-WmiEvent*"
+    OR command_line="*__EventFilter*"
+    OR command_line="*CommandLineEventConsumer*"
+))
+| eval alert_name="Persistence - Wmic or powershell subscription events",
+    rule_id="SPL-11",
+    mitre_technique="T1546",
+    severity="medium",
+    sigma_id="716e00cd-8006-445f-abd2-2f0f9954684a",
+    platform="Windows",
+    datasource="Sysmon",
+    formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
+    time=_time]
+| append
+[
+    search index="windows_os" sourcetype="WinEventLog:Security"
+event_code="4720"
+| eval alert_name="Persistence - Windows user account creation",
+    rule_id="SPL-12",
+    mitre_technique="T1136",
+    severity="medium",
+    sigma_id="a6abdb51-cbf2-49aa-a23d-bb0bc34a06eb",
+    platform="Windows",
+    datasource="Security",
+    formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
+    time=_time]
+| append
+[
+    search index="windows_os" sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational"
+(
+    parent_executable="*\fodhelper.exe"
+    OR parent_executable="*\eventvwr.exe"
+    OR parent_executable="*\computerdefaults.exe"
+    OR parent_executable="*\sdclt.exe"
+)
+AND
+(
+    executable="*\cmd.exe"
+    OR executable="*\powershell.exe"
+)
+| eval alert_name="Privilege Escalation - UAC workaround via known LOLBins",
+    rule_id="SPL-15",
+    mitre_technique="T1548.002",
+    severity="high",
+    sigma_id="cc1386dd-3dcd-401a-889f-b93dd34a77c7",
+    platform="Windows",
+    datasource="Sysmon",
+    formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
+    time=_time]
+| append
+[
+    search index="windows_os" sourcetype="WinEventLog:Security"
+event_code="4625"
+| bin _time span=5m
+| stats count by hostname _time
+| where count > 10
+| eval alert_name="Credential Access - Windows account bruteforce",
+    rule_id="SPL-16",
+    mitre_technique="T1110",
+    severity="high",
+    sigma_id="e518646b-495a-457f-8fa9-1fbb5bf76f2c",
+    platform="Windows",
+    datasource="Security",
+    formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
+    time=_time]
+| append
+[
+    search index="windows_os" sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational"
+(
+    command_line="*sekurlsa::logonpasswords*"
+    OR command_line="*lsadump::sam*"
+    OR command_line="*privilege::debug*"
+    OR command_line="*kerberos::list*"
+)
+OR
+(
+    command_line="*procdump*"
+    OR command_line="*lsass*"
+)
+| eval alert_name="Credential Access - credentials dumping",
+    rule_id="SPL-17",
+    mitre_technique="T1003",
+    severity="critical",
+    sigma_id="3207e611-4d94-4850-9aba-e43c33534171",
+    platform="Windows",
+    datasource="Sysmon",
+    formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
+    time=_time]
+| append
+[
+    search index="windows_os" sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational"
+(
+    command_line="*net user*"
+    OR command_line="*net localgroup administrators*"
+    OR command_line="*net group "domain admins"*"
+    OR command_line="*whoami /groups*"
+    OR command_line="*Get-ADUser*"
+    OR command_line="*Get-LocalUser*"
+)
+| eval alert_name="Discovery - Windows account enumeration",
+    rule_id="SPL-18",
+    mitre_technique="T1087",
+    severity="low",
+    sigma_id="96d0a298-2714-4842-95a5-db4b7eaaca78",
+    platform="Windows",
+    datasource="Sysmon",
+    formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
+    time=_time]
+| append
+[
+    search index="windows_os" sourcetype="WinEventLog:Security"
+event_code="4624"
+AND
+logon_type="10"
+| eval alert_name="Lateral Movement - RDP connection",
+    rule_id="SPL-20",
+    mitre_technique="T1021.001",
+    severity="low",
+    sigma_id="06c6b62c-234b-4482-8f56-c2c60c7afefc",
+    platform="Windows",
+    datasource="Security",
+    formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
+    time=_time]
+| append
+[
+    search index="windows_os" sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational"
+(
+    command_line="*sekurlsa::pth*"
+    OR command_line="*over-pass-the-hash*"
+    OR command_line="*/ptt*"
+)
+| eval alert_name="Lateral Movement - Alternative authentication indicators",
+    rule_id="SPL-22",
+    mitre_technique="T1550",
+    severity="high",
+    sigma_id="e079b92e-8797-49d2-aa94-8b24935fce88",
+    platform="Windows",
+    datasource="Sysmon",
+    formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
+    time=_time]
+| append
+[
+    search index="windows_os" sourcetype="yara"
+alert_name="*Mimikatz_Indicators*"
+| eval alert_name="Credential Access - Mimikatz",
+    rule_id="SPL-28",
+    mitre_technique="T1003",
+    severity="critical",
+    sigma_id="2ab9b86a-c229-45c6-85c2-ddb406876957",
+    platform="Windows",
+    datasource="YARA",
+    formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
+    time=_time]
+| append
+[
+    search index="windows_os" sourcetype="yara"
+alert_name="*PowerShell_Dropper_Indicators*"
+| eval alert_name="Execution - PowerShell Dropper",
+    rule_id="SPL-29",
+    mitre_technique="T1059.001",
+    severity="high",
+    sigma_id="389d33e5-02ac-4d73-b366-5ad1fdbbc9eb",
+    platform="Windows",
+    datasource="YARA",
+    formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
+    time=_time]
+| append
+[
+    search index="monitoring" sourcetype="suricata"
+alert_signature="*Possible TCP SYN Scan*"
+| eval alert_name="Reconnaissance - TCP SYN port scan",
+    rule_id="SPL-01",
+    mitre_technique="T1595",
+    severity="medium",
+    sigma_id="031fe431-9cd8-45ca-b65d-7a4198f5f843",
+    platform="Network",
+    datasource="Suricata",
+    formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
+    time=_time]
+| append
+[
+    search index="monitoring" sourcetype="suricata"
+alert_signature="*Download EXE File*"
+| eval alert_name="Initial Access - Executable file download",
+    rule_id="SPL-03",
+    mitre_technique="T1566",
+    severity="medium",
+    sigma_id="af7ff266-98a5-4ef3-a94c-b6502f7ea96a",
+    platform="Network",
+    datasource="Suricata",
+    formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
+    time=_time]
+| append
+[
+    search index="monitoring" sourcetype="suricata"
+alert_signature="*Possible TCP SYN Scan*"
+| eval alert_name="Discovery - Network service discovery",
+    rule_id="SPL-19",
+    mitre_technique="T1046",
+    severity="medium",
+    sigma_id="423b4887-328e-439d-bbf4-263169a10ad5",
+    platform="Network",
+    datasource="Suricata",
+    formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
+    time=_time]
+| append
+[
+    search index="monitoring" sourcetype="suricata"
+alert_signature="*Cleartext Credentials*"
+| eval alert_name="Command and Control - C2 web traffic",
+    rule_id="SPL-23",
+    mitre_technique="T1071.001",
+    severity="high",
+    sigma_id="2683bc20-d66f-4950-bc14-6a9c2839883b",
+    platform="Network",
+    datasource="Suricata",
+    formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
+    time=_time]
+| append
+[
+    search index="monitoring" sourcetype="suricata"
+(
+    alert_signature="*Possible DGA Domain*"
+    OR alert_signature="*Long subdomain*"
+    OR alert_signature="*Possible base64 tunneling*"
+)
+| eval alert_name="Command and Control - DNS Tunneling or C2",
+    rule_id="SPL-24",
+    mitre_technique="T1071.004",
+    severity="high",
+    sigma_id="6c7c1bcc-9c31-4fed-a9b2-bd2051de9633",
+    platform="Network",
+    datasource="Suricata",
+    formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
+    time=_time]
+| append
+[
+    search index="monitoring" sourcetype="zeek_conn"
+(dest_port="443" AND duration>=30 AND orig_bytes>=5000000)
+| eval alert_name="Exfiltration - Web data transfer",
+    rule_id="SPL-25",
+    mitre_technique="T1567",
+    severity="medium",
+    sigma_id="1f854909-8ff8-4200-b039-37327f6e4468",
+    platform="Network",
+    datasource="Zeek",
+    formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
+    time=_time]
+| foreach alert_name rule_id severity mitre_technique platform datasource sigma_id formatted_time time hostname user event_code src_ip dest_ip dest_port executable process_name parent_executable command_line file_path hash alert_signature sourcetype [
+    eval _raw=_raw . "<<FIELD>>=\"" . '<<FIELD>>' . "\" "
+]
+| collect index=siem_alerts

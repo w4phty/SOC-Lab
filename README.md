@@ -26,8 +26,26 @@ Encontered problems and what I learned from them:
 - Windows endpoint: the initial configuration of yara was that yara was triggered any time a file is created, but the logs were added to a new file, and yara kept triggering on the newly created log file. This used so much resources that it crashed both the windows endpoint in the VM and the host computer. when rebooting the host, I completely recreated the Windows endpoint, using the documentation, and switched from the execution of yara from triggering events to a scheduled task.
 - creating sigma and splunk alerts takes up a lot of time. In order to speed things up, I wrote an automation script adapted to the sigma rules of the lab, to create splunk alerts faster. This reduces the risk of error and increases the efficiency.
 - throughout the setup, testing is really important. I encountered many configuration problems that if not fixed during testing, could have led to failure to detect malicious activity.
+- Splunk Free does not allow creation of planned alert: need to create reports and run them manually. In order to avoid having to run one report for each splunk alert, I created another script to concatenate all alerts by platform, to be able to run all splunk alerts and collect them at once.
 
 
 
 
 Index
+
+Proposition d'organisation du readme:
+## Lab Objectives
+
+## Architecture
+
+## Data Collection
+
+## Detection Engineering
+
+## Attack Scenarios
+
+## Incident Response
+
+## Lessons Learned
+
+## Technical Stack

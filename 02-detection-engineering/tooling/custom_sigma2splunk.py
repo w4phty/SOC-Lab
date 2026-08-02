@@ -17,7 +17,26 @@ source_type_dict = {
     "conn":"zeek_conn",
     "process_creation":"WinEventLog:Microsoft-Windows-Sysmon/Operational",
     "security":"WinEventLog:Security"
-    }
+}
+
+platform_dict = {
+    "linux":"Linux",
+    "windows":"Windows",
+    "monitoring": "Network",
+    "zeek":"Network"
+}
+
+datasource_dict = {
+    "auditd":"Audit",
+    "sudo":"Sudo",
+    "sshd":"Sshd",
+    "yara":"YARA",
+    "suricata":"Suricata",
+    "conn":"Zeek",
+    "process_creation":"Sysmon",
+    "security":"Security"
+}
+
 
 def read_sigma_rule(filename):
     with open(filename, "r", encoding="utf-8") as sigma_file:
@@ -31,8 +50,12 @@ def build_eval(file):
     eval_mitre_technique = f'mitre_technique=\"{file["tags"][1].removeprefix("attack.").upper()}\"'
     eval_severity = f'severity=\"{file["level"]}\"'
     eval_sigma_id = f'sigma_id=\"{file["id"]}\"'
+    eval_platform = f'platform=\"{platform_dict[file["logsource"]["product"]]}\"'
+    eval_datasource = f'datasource=\"{datasource_dict[file["logsource"]["service"]]}\"'
+    eval_formatted_time = f'formatted_time=strftime(_time,\"%Y-%m-%d %H:%M:%S\")'
+    eval_time = f'time=_time'
     
-    eval_request = "| eval " + ",\n    ".join([eval_alert_name, eval_rule_id, eval_mitre_technique, eval_severity, eval_sigma_id])
+    eval_request = "| eval " + ",\n    ".join([eval_alert_name, eval_rule_id, eval_mitre_technique, eval_severity, eval_sigma_id, eval_platform, eval_datasource, eval_formatted_time, eval_time])
     return eval_request
 
 
@@ -126,17 +149,12 @@ def build_splunk(file):
 
     # add eval alert_name, rule_id, mitre_technique, severity, sigma_id
     splunk_request += build_eval(file)
-
-    # add collect index
-    collect_index = "\n| collect index=siem_alerts"
-    splunk_request += collect_index
     
     return splunk_request
 
 
 def main():
-    print(os.getcwd())
-    folder = "shared-lab/SIEM-setup/sigma-rules/linux"
+    folder = "shared-lab/SIEM-setup/sigma-rules/windows"
     for filename in os.listdir(folder):
         if filename.endswith((".yaml")):
             path = os.path.join(folder, filename)
