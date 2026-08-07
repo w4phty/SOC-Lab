@@ -13,7 +13,7 @@ logsource:
   service: auditd
 detection:
   selection_exe:
-    executable|endswith:
+    command_line|contains:
       - '/python3'
       - '/python'
   selection_cmd:

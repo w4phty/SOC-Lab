@@ -237,7 +237,7 @@ logon_type="10"
 | append
 [
     search index="windows_os" sourcetype="yara"
-alert_name="*Mimikatz_Indicators*"
+alert_signature="*Mimikatz_Indicators*"
 | eval alert_name="Credential Access - Mimikatz",
     rule_id="SPL-28",
     mitre_technique="T1003",
@@ -250,7 +250,7 @@ alert_name="*Mimikatz_Indicators*"
 | append
 [
     search index="windows_os" sourcetype="yara"
-alert_name="*PowerShell_Dropper_Indicators*"
+alert_signature="*PowerShell_Dropper_Indicators*"
 | eval alert_name="Execution - PowerShell Dropper",
     rule_id="SPL-29",
     mitre_technique="T1059.001",
@@ -261,6 +261,6 @@ alert_name="*PowerShell_Dropper_Indicators*"
     formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
     time=_time]
 | foreach alert_name rule_id severity mitre_technique platform datasource sigma_id formatted_time time hostname user event_code src_ip dest_ip dest_port executable process_name parent_executable command_line file_path hash alert_signature sourcetype [
-    eval _raw=_raw . "<<FIELD>>=\"" . '<<FIELD>>' . "\" "
+eval _raw=_raw . "<<FIELD>>=\"" . '<<FIELD>>' . "\" "
 ]
 | collect index=siem_alerts

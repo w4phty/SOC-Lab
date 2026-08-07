@@ -1,0 +1,26 @@
+mitre_id,technique,tactic
+T1595,Active Scanning,Reconnaissance
+T1598,Phishing for Information,Reconnaissance
+T1566,Phishing,Initial Access
+T1059.001,PowerShell,Execution
+T1059.003,Windows Command Shell,Execution
+T1059.004,Unix Shell,Execution
+T1059.006,Python,Execution
+T1204,Initial access,Execution
+T1053.003,Scheduled Cron Job,Persistence
+T1053.005,Scheduled Task,Persistence
+T1546,Event Triggered Execution,Persistence
+T1136,Create Account,Persistence
+T1548.001,Setuid and Setgid,Privilege Escalation
+T1548.003,Sudo and Sudo Caching,Privilege Escalation
+T1110,Brute Force,Credential Access
+T1003,OS Credential Dumping,Credential Access
+T1087,Account Discovery,Discovery
+T1046,Network Service Discovery,Discovery
+T1021.001,Remote Desktop Protocol,Lateral Movement
+T1021.004,SSH,Lateral Movement
+T1550,Use Alternate Authentication Material,Lateral Movement
+T1071.001,Web Protocols,Command and Control
+T1071.004,DNS,Command and Control
+T1567,Exfiltration Over Web Service,Exfiltration
+

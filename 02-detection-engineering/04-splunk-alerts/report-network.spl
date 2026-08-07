@@ -1,5 +1,5 @@
 index="monitoring" sourcetype="suricata"
-alert_signature="*Possible TCP SYN Scan*"
+alert_signature="*SYN Scan*"
 | eval alert_name="Reconnaissance - TCP SYN port scan",
     rule_id="SPL-01",
     mitre_technique="T1595",
@@ -25,7 +25,7 @@ alert_signature="*Download EXE File*"
 | append
 [
     search index="monitoring" sourcetype="suricata"
-alert_signature="*Possible TCP SYN Scan*"
+alert_signature="*SYN Scan*"
 | eval alert_name="Discovery - Network service discovery",
     rule_id="SPL-19",
     mitre_technique="T1046",
@@ -79,6 +79,6 @@ alert_signature="*Cleartext Credentials*"
     formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
     time=_time]
 | foreach alert_name rule_id severity mitre_technique platform datasource sigma_id formatted_time time hostname user event_code src_ip dest_ip dest_port executable process_name parent_executable command_line file_path hash alert_signature sourcetype [
-    eval _raw=_raw . "<<FIELD>>=\"" . '<<FIELD>>' . "\" "
+eval _raw=_raw . "<<FIELD>>=\"" . '<<FIELD>>' . "\" "
 ]
 | collect index=siem_alerts

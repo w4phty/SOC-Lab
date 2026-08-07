@@ -1,10 +1,15 @@
 index="linux_os" sourcetype="linux_audit"
-(process_name="bash" AND (
+ type=EXECVE
+   | `auditd_command_line`
+   | search 
+command_line="*bash *"
+AND
+(
     command_line="*/dev/tcp/*"
     OR command_line="*bash -i*"
     OR command_line="*0>&1*"
     OR command_line="*nc -e*"
-))
+)
 | eval alert_name="Execution - Bash reverse shell",
     rule_id="SPL-06",
     mitre_technique="T1059.004",
@@ -17,9 +22,12 @@ index="linux_os" sourcetype="linux_audit"
 | append
 [
     search index="linux_os" sourcetype="linux_audit"
+ type=EXECVE
+   | `auditd_command_line`
+   | search 
 (
-    executable="*/python3"
-    OR executable="*/python"
+    command_line="*/python3*"
+    OR command_line="*/python*"
 )
 AND
 (
@@ -40,6 +48,9 @@ AND
 | append
 [
     search index="linux_os" sourcetype="linux_audit"
+ type=EXECVE
+   | `auditd_command_line`
+   | search 
 (
     command_line="*crontab -e*"
     OR command_line="*crontab -l*"
@@ -49,9 +60,9 @@ AND
 )
 OR
 (
-    name="*/etc/cron.d/*"
-    OR name="*/etc/crontab*"
-    OR name="*/var/spool/cron/*"
+    command_line="*/etc/cron.d/*"
+    OR command_line="*/etc/crontab*"
+    OR command_line="*/var/spool/cron/*"
 )
 | eval alert_name="Persistence - Suspicious cron modification",
     rule_id="SPL-09",
@@ -65,6 +76,9 @@ OR
 | append
 [
     search index="linux_os" sourcetype="linux_audit"
+ type=EXECVE
+   | `auditd_command_line`
+   | search 
 (
     command_line="*chmod +s*"
     OR command_line="*chmod u+s*"
@@ -122,6 +136,9 @@ authentication_action="*Failed password*"
 | append
 [
     search index="linux_os" sourcetype="linux_audit"
+ type=EXECVE
+   | `auditd_command_line`
+   | search 
 (
     command_line="*/etc/passwd*"
     OR command_line="*/etc/shadow*"
@@ -155,7 +172,7 @@ authentication_action="*Accepted password*"
 | append
 [
     search index="linux_os" sourcetype="yara"
-alert_name="*Linux_Reverse_Shell_Indicators*"
+alert_signature="*Linux_Reverse_Shell_Indicators*"
 | eval alert_name="Execution - Reverse Shell",
     rule_id="SPL-26",
     mitre_technique="T1059.004",
@@ -168,7 +185,7 @@ alert_name="*Linux_Reverse_Shell_Indicators*"
 | append
 [
     search index="linux_os" sourcetype="yara"
-alert_name="*Python_Backdoor_Indicators*"
+alert_signature="*Python_Backdoor_Indicators*"
 | eval alert_name="Execution - Python Backdoor",
     rule_id="SPL-27",
     mitre_technique="T1059.006",
@@ -179,7 +196,7 @@ alert_name="*Python_Backdoor_Indicators*"
     formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
     time=_time]
 | append
-[ 
+[
     search index="windows_os" sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational"
 executable="*\powershell.exe"
 AND
@@ -419,7 +436,7 @@ logon_type="10"
 | append
 [
     search index="windows_os" sourcetype="yara"
-alert_name="*Mimikatz_Indicators*"
+alert_signature="*Mimikatz_Indicators*"
 | eval alert_name="Credential Access - Mimikatz",
     rule_id="SPL-28",
     mitre_technique="T1003",
@@ -432,7 +449,7 @@ alert_name="*Mimikatz_Indicators*"
 | append
 [
     search index="windows_os" sourcetype="yara"
-alert_name="*PowerShell_Dropper_Indicators*"
+alert_signature="*PowerShell_Dropper_Indicators*"
 | eval alert_name="Execution - PowerShell Dropper",
     rule_id="SPL-29",
     mitre_technique="T1059.001",
@@ -445,7 +462,7 @@ alert_name="*PowerShell_Dropper_Indicators*"
 | append
 [
     search index="monitoring" sourcetype="suricata"
-alert_signature="*Possible TCP SYN Scan*"
+alert_signature="*SYN Scan*"
 | eval alert_name="Reconnaissance - TCP SYN port scan",
     rule_id="SPL-01",
     mitre_technique="T1595",
@@ -471,7 +488,7 @@ alert_signature="*Download EXE File*"
 | append
 [
     search index="monitoring" sourcetype="suricata"
-alert_signature="*Possible TCP SYN Scan*"
+alert_signature="*SYN Scan*"
 | eval alert_name="Discovery - Network service discovery",
     rule_id="SPL-19",
     mitre_technique="T1046",
@@ -525,6 +542,6 @@ alert_signature="*Cleartext Credentials*"
     formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
     time=_time]
 | foreach alert_name rule_id severity mitre_technique platform datasource sigma_id formatted_time time hostname user event_code src_ip dest_ip dest_port executable process_name parent_executable command_line file_path hash alert_signature sourcetype [
-    eval _raw=_raw . "<<FIELD>>=\"" . '<<FIELD>>' . "\" "
+eval _raw=_raw . "<<FIELD>>=\"" . '<<FIELD>>' . "\" "
 ]
 | collect index=siem_alerts

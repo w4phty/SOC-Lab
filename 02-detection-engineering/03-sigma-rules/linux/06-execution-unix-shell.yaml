@@ -11,14 +11,15 @@ logsource:
   product: linux
   service: auditd
 detection:
-  selection:
-    process_name: 'bash'
+  selection_process:
+    command_line|contains: 'bash '
+  selection_cmd:
     command_line|contains:
       - '/dev/tcp/'
       - 'bash -i'
       - '0>&1'
       - 'nc -e'
-  condition: selection
+  condition: selection_process and selection_cmd
 falsepositives:
   - Legitimate admin script involving /dev/tcp
 level: critical

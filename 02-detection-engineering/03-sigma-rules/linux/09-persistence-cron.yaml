@@ -19,7 +19,7 @@ detection:
       - '/etc/cron.d/'
       - 'crontab'
   selection_file:
-    name|contains:
+    command_line|contains:
       - '/etc/cron.d/'
       - '/etc/crontab'
       - '/var/spool/cron/'

@@ -54,9 +54,25 @@ refaire liste de splunk: doit être OK
 tests dans splunk, création du mapping dans props.conf (lien vers une copie du fichier)
 et des regex dans transforms.conf (lien vers une copie du fichier)
 
+ajout d'un macro pour auditd command line
+rex max_match=0 field=_raw "(?<arg_field>a\d+)=(?<arg>[^\s]+)"
+| eval arg=trim(arg,"\"")
+| eval pair=mvzip(arg_field,arg,"=")
+| mvexpand pair
+| rex field=pair "(?<arg_field>a\d+)=(?<arg>.*)"
+| eval pos=tonumber(replace(arg_field,"a",""))
+| eval decoded_arg=if(match(arg,"^[0-9A-Fa-f]+$"),
+                      urldecode(replace(arg,"([0-9A-Fa-f]{2})","%\1")),
+                      arg)
+| sort 0 _time pos
+| stats list(decoded_arg) AS args by _time
+| eval decoded_cmd=mvjoin(args," ")
+
 3. Ecriture des règles sigma
 -> basé sur les champs mappés
 -> mapping MITRE, et fichier pour le lookup
+
+!!! revoir les liens vers les fichiers sigma depuis les fichiers alertes splunk
 
 4. transformation des règles sigma en règles splunk
 -> script d'automatisation custom sigma -> splunk

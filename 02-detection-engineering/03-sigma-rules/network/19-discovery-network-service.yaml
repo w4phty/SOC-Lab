@@ -13,7 +13,7 @@ logsource:
   service: suricata
 detection:
   selection:
-    alert_signature|contains: 'Possible TCP SYN Scan'
+    alert_signature|contains: 'SYN Scan'
   condition: selection
 falsepositives:
   - Legitimate scans, monitoring purposes

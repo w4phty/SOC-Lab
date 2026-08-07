@@ -11,7 +11,7 @@ logsource:
   service: yara
 detection:
   selection:
-    alert_name|contains: 'Linux_Reverse_Shell_Indicators'
+    alert_signature|contains: 'Linux_Reverse_Shell_Indicators'
   condition: selection
 falsepositives:
   - Legitimate admin script involving /dev/tcp

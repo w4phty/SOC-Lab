@@ -91,9 +91,9 @@ We create auditd rules in the file /etc/audit/rules.d/soc.rules :
 -w /etc/shadow -p wa -k shadow_change
 # ssh
 -w /etc/ssh/sshd_config -p wa -k ssh_change
-# command run as root
--a always,exit -F arch=b64 -S execve -F euid=0 -k privileged_cmd
--a always,exit -F arch=b32 -S execve -F euid=0 -k privileged_cmd
+# all commands
+-a always,exit -F arch=b64 -S execve -k execve
+-a always,exit -F arch=b32 -S execve -k execve
 # file deletion
 -a always,exit -F arch=b64 -S unlink -k file_delete
 -a always,exit -F arch=b32 -S unlink  -k file_delete

@@ -27,6 +27,7 @@ Encontered problems and what I learned from them:
 - creating sigma and splunk alerts takes up a lot of time. In order to speed things up, I wrote an automation script adapted to the sigma rules of the lab, to create splunk alerts faster. This reduces the risk of error and increases the efficiency.
 - throughout the setup, testing is really important. I encountered many configuration problems that if not fixed during testing, could have led to failure to detect malicious activity.
 - Splunk Free does not allow creation of planned alert: need to create reports and run them manually. In order to avoid having to run one report for each splunk alert, I created another script to concatenate all alerts by platform, to be able to run all splunk alerts and collect them at once.
+- auditd encodes in hexadecimal the command line arguments if it contains special characters: I realized it while testing the alerts. Two points are learned from this: testing is paramount, and a macro was added to parse the command line properly.
 
 
 

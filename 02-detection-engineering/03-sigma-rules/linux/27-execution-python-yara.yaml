@@ -11,7 +11,7 @@ logsource:
   service: yara
 detection:
   selection:
-    alert_name|contains: 'Python_Backdoor_Indicators'
+    alert_signature|contains: 'Python_Backdoor_Indicators'
   condition: selection
 falsepositives:
   - Legitimate admin scripts using python socket/subprocess

@@ -11,7 +11,7 @@ logsource:
   service: yara
 detection:
   selection:
-    alert_name|contains: 'PowerShell_Dropper_Indicators'
+    alert_signature|contains: 'PowerShell_Dropper_Indicators'
   condition: selection
 falsepositives:
   - very few possibilities of false positives

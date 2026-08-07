@@ -144,6 +144,11 @@ def build_splunk(file):
     splunk_request += filter_index
     splunk_request += filter_sourcetype
     
+    # add auditd build command line
+    if (file["logsource"]["service"] == "auditd"):
+        filter_command_line = " type=EXECVE\n   | `auditd_command_line`\n   | search \n"
+        splunk_request += filter_command_line
+        
     # add detection
     splunk_request += build_detection(file)
 
@@ -154,7 +159,7 @@ def build_splunk(file):
 
 
 def main():
-    folder = "shared-lab/SIEM-setup/sigma-rules/windows"
+    folder = "02-detection-engineering/03-sigma-rules/linux"
     for filename in os.listdir(folder):
         if filename.endswith((".yaml")):
             path = os.path.join(folder, filename)
