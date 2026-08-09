@@ -20,7 +20,7 @@ detection:
       - 'nc -e'
       - 'python3 -c'
       - 'vim -c'
-      - 'less /etc/shadow'
+      - '/etc/shadow'
   condition: selection
 falsepositives:
   - Admin system using legitimate root shell via sudo

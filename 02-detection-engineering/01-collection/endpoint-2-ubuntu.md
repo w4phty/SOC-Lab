@@ -117,7 +117,7 @@ $ sudo augenrules --load
 $ sudo auditctl -l
 ```
 
-To test the auditd configuration, we can run commands that will trigger the rules, such as a privileged command for instance. Then use `$ ausearch -k privileged_cmd` to verify that the action was logged. The auditd logs are in the /var/log/audit/audit.log file.
+To test the auditd configuration, we can run commands that will trigger the rules, such as a privileged command for instance. Then use `$ ausearch -k execve` to verify that the action was logged. The auditd logs are in the /var/log/audit/audit.log file.
 
 ## YARA
 
@@ -215,6 +215,7 @@ For SSH logs, create the file /etc/logrotate.d/sshd with the following content:
     compress
     missingok
     notifempty
+    create 0640 syslog adm
 }
 ```
 
@@ -226,6 +227,7 @@ For bash history logs, create the file /etc/logrotate.d/bash_commands with the f
     compress
     missingok
     notifempty
+    create 0640 syslog adm
 }
 ```
 
@@ -237,6 +239,7 @@ For sudo logs, create the file /etc/logrotate.d/sudo with the following content:
     compress
     missingok
     notifempty
+    create 0640 syslog adm
 }
 ```
 

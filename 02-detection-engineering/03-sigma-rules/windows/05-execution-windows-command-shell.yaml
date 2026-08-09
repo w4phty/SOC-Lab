@@ -12,14 +12,14 @@ logsource:
   service: process_creation
 detection:
   selection_exe:
-    executable|endswith: '\cmd.exe'
+    parent_executable|endswith: '\cmd.exe'
   selection_cmd:
     command_line|contains:
-      - 'whoami /all'
-      - 'net user /domain'
-      - 'net group "domain admins"'
+      - 'whoami  /all'
+      - 'net  user /domain'
+      - 'net  group \"domain admins\"'
       - 'systeminfo'
-      - 'tasklist /v'
+      - 'tasklist  /v'
       - '& echo'
       - '/c powershell'
   condition: selection_exe and selection_cmd

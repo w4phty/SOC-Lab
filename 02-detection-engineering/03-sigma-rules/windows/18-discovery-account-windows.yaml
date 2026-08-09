@@ -12,10 +12,10 @@ logsource:
 detection:
   selection:
     command_line|contains:
-      - 'net user'
-      - 'net localgroup administrators'
-      - 'net group "domain admins"'
-      - 'whoami /groups'
+      - 'net  user'
+      - 'net  localgroup administrators'
+      - 'net  group \"domain admins\"'
+      - 'whoami  /groups'
       - 'Get-ADUser'
       - 'Get-LocalUser'
   condition: selection

@@ -28,6 +28,7 @@ Encontered problems and what I learned from them:
 - throughout the setup, testing is really important. I encountered many configuration problems that if not fixed during testing, could have led to failure to detect malicious activity.
 - Splunk Free does not allow creation of planned alert: need to create reports and run them manually. In order to avoid having to run one report for each splunk alert, I created another script to concatenate all alerts by platform, to be able to run all splunk alerts and collect them at once.
 - auditd encodes in hexadecimal the command line arguments if it contains special characters: I realized it while testing the alerts. Two points are learned from this: testing is paramount, and a macro was added to parse the command line properly.
+- logrotate recrée les fichiers avec mauvaises permissions donc les logs bash sudo et sshd ne sont plus écrits par syslog (solution chmod 666 sur les fichiers de logs, changement de la conf logrotate)
 
 
 

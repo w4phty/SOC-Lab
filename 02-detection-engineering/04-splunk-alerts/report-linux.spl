@@ -106,7 +106,7 @@ OR
     OR command_line="*nc -e*"
     OR command_line="*python3 -c*"
     OR command_line="*vim -c*"
-    OR command_line="*less /etc/shadow*"
+    OR command_line="*/etc/shadow*"
 )
 | eval alert_name="Privilege Escalation - Sudo",
     rule_id="SPL-14",

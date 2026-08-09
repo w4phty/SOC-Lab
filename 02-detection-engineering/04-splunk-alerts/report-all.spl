@@ -106,7 +106,7 @@ OR
     OR command_line="*nc -e*"
     OR command_line="*python3 -c*"
     OR command_line="*vim -c*"
-    OR command_line="*less /etc/shadow*"
+    OR command_line="*/etc/shadow*"
 )
 | eval alert_name="Privilege Escalation - Sudo",
     rule_id="SPL-14",
@@ -223,14 +223,14 @@ AND
 | append
 [
     search index="windows_os" sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational"
-executable="*\cmd.exe"
+parent_executable="*\cmd.exe"
 AND
 (
-    command_line="*whoami /all*"
-    OR command_line="*net user /domain*"
-    OR command_line="*net group "domain admins"*"
+    command_line="*whoami  /all*"
+    OR command_line="*net  user /domain*"
+    OR command_line="*net  group \"domain admins\"*"
     OR command_line="*systeminfo*"
-    OR command_line="*tasklist /v*"
+    OR command_line="*tasklist  /v*"
     OR command_line="*& echo*"
     OR command_line="*/c powershell*"
 )
@@ -346,9 +346,9 @@ AND
 [
     search index="windows_os" sourcetype="WinEventLog:Security"
 event_code="4625"
-| bin _time span=5m
+| bin _time span=2m
 | stats count by hostname _time
-| where count > 10
+| where count > 4
 | eval alert_name="Credential Access - Windows account bruteforce",
     rule_id="SPL-16",
     mitre_technique="T1110",
@@ -385,10 +385,10 @@ OR
 [
     search index="windows_os" sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational"
 (
-    command_line="*net user*"
-    OR command_line="*net localgroup administrators*"
-    OR command_line="*net group "domain admins"*"
-    OR command_line="*whoami /groups*"
+    command_line="*net  user*"
+    OR command_line="*net  localgroup administrators*"
+    OR command_line="*net  group \"domain admins\"*"
+    OR command_line="*whoami  /groups*"
     OR command_line="*Get-ADUser*"
     OR command_line="*Get-LocalUser*"
 )
