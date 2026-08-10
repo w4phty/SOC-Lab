@@ -54,19 +54,9 @@ refaire liste de splunk: doit être OK
 tests dans splunk, création du mapping dans props.conf (lien vers une copie du fichier)
 et des regex dans transforms.conf (lien vers une copie du fichier)
 
-ajout d'un macro pour auditd command line
-rex max_match=0 field=_raw "(?<arg_field>a\d+)=(?<arg>[^\s]+)"
-| eval arg=trim(arg,"\"")
-| eval pair=mvzip(arg_field,arg,"=")
-| mvexpand pair
-| rex field=pair "(?<arg_field>a\d+)=(?<arg>.*)"
-| eval pos=tonumber(replace(arg_field,"a",""))
-| eval decoded_arg=if(match(arg,"^[0-9A-Fa-f]+$"),
-                      urldecode(replace(arg,"([0-9A-Fa-f]{2})","%\1")),
-                      arg)
-| sort 0 _time pos
-| stats list(decoded_arg) AS args by _time
-| eval decoded_cmd=mvjoin(args," ")
+pour auditd command line: ajout d'une macro pour décoder les champs en hexadécimal. la macro est ensuite utilisée dans les requete d'alimentation de l'index siem_alerts
+
+
 
 3. Ecriture des règles sigma
 -> basé sur les champs mappés
@@ -76,25 +66,10 @@ rex max_match=0 field=_raw "(?<arg_field>a\d+)=(?<arg>[^\s]+)"
 
 4. transformation des règles sigma en règles splunk
 -> script d'automatisation custom sigma -> splunk
--> enregistrement des alertes dans splunk
-Schedule : toutes les 5 minutes
-Time range : Last 5 minutes
-Trigger condition : Number of Results > 0
-Trigger : Once (une seule fois par exécution de la recherche)
 -> avec splunk free pas possible d'enregistrer des alertes récurrente
-méthode: enregistrer un report, le lancer avec un timerange correspondant au début de l'attaque pour éviter les doublons
-lien fichiers spl qui contiennent les reports
+méthode: enregistrer un report, le lancer avec un timerange correspondant au début du scénario d'attaque étudié pour éviter les doublons
 
-à la fin des reports:
-| eval _raw="alert_name=\"".alert_name."\" rule_id=\"".rule_id."\" mitre_technique=\"".mitre_technique."\" severity=\"".severity."\" sigma_id=\"".sigma_id."\" platform=\"".platform."\" datasource=\"".datasource."\""
-| collect index=siem_alerts
-et besoin d'ajouter des regex pour lire les champs
 
-!!! ajouter le mapping des timestamp pour les avoir dans les alertes
-
-ici alertes arrivent dans stash, ok pour lab mais en environnement réel, il faudrait une vraie datasource
-
-ajouter screenshot alert fields
 
 5. tests de toutes les règles et vérification de la remontée des alertes
 

@@ -18,7 +18,8 @@ Technical Stack
 - Malware monitoring: YARA
 - Log forwarding: Splunk Universal Forwarder
 - SIEM: Splunk Enterprise dashboards and alerts
-- Attacks generated from Kali using hydra, metasploit, python3
+- Attacks generated from Kali using hydra, python3, smbclient, netcat
+- Automation of splunk reports creation and update: python3
 
 
 Encontered problems and what I learned from them:

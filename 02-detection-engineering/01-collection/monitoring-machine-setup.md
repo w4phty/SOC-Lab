@@ -157,6 +157,32 @@ no-resolv
 
 Restart dnsmasq to apply the modified configuration with `$ sudo systemctl restart dnsmasq`.
 
+## Network traffic capture
+
+The internal traffic between all virtual machines is captured by the monitoring machine and stored as pcap files.
+To do so, we create a service called lab-pcap that will run whenever the monitoring machine is started.
+
+First, we create a file `/etc/systemd/system/lab-pcap.service` with the following content:
+```
+[Service]
+Type=simple
+
+ExecStartPre=/bin/sh -c 'find /var/log/pcap -name "traffic-*.pcap" -mtime +2 -delete'
+
+ExecStart=/bin/sh -c 'exec /usr/sbin/tcpdump -i enp0s8 -n -U -w "/var/log/pcap/traffic-$(date +%%Y-%%m-%%d).pcap"'
+
+Restart=on-failure
+RestartSec=5
+```
+
+Then we load the new service:
+```
+$ sudo systemctl daemon-reload
+$ sudo systemctl restart lab-pcap.service
+```
+
+For any upcoming investigations, pcap files can be found in the directory /var/log/pcap. They are saved for two days only.
+
 
 ## Splunk Forwarder
 
