@@ -1,26 +1,76 @@
-# SOC-Lab
-Security Operations Center Lab
+# SOC Lab: Detection Engineering & Incident Investigation
 
-Content of the Lab
+This project is a hands-on SOC lab designed to demonstrate detection engineering, security monitoring, incident investigation and incident response across Windows and Linux environments. It covers the complete workflow from log collection and normalization to Sigma-based detection, Splunk alerting, attack simulation, investigation and executive reporting.
 
-- Architecture setup, creation of Endpoints, attacker machine, monitoring machine, SIEM
-- Logging setup: Endpoint setup for ubuntu and windows, monitoring
-- SIEM setup: logs receiving, parsing of the fields, create Sigma rules, custom python script to translate sigma rules into splunk alerts, creation of SIEM dashboards
-- workbook setup
-- Basic Attacks and analysis: phishing and credential exposure, nmap scan, ssh and rdp bruteforce, privileges escalation, persistence 
-- Network traffic analysis and detection: telnet connection, C2, DNS tunneling
-- Malware static and dynamic analysis, exfiltration IoC, sigma and yara updates, incident response
+
+## Architecture
+
+The lab is made of two endpoints (Windows and Ubuntu), a monitoring machine (Ubuntu).
+The attacker machine is a Kali Linux machine.
+The SIEM is setup with Splunk, hosted on a Windows machine.
+
+The architecture in place is represented in the diagram below:
+
+![architecture](./01-architecture/SOC-Lab-Architecture.drawio.png)
+
+## Detection Engineering
+
+The detection workflow is:
+
+1. Log Collection: collect logs on each endpoint and forward them to the SIEM
+2. Field Normalization: map the logs original fields to common fields shared between all data sources
+3. Sigma Rules: detection rules for windows, linux and network activity, based on normalized fields
+4. Splunk Alerts: create splunk searches based on Sigma rules, using a custom automation python script
+5. Dashboards: create Splunk dashboards to display important information, including the main KPIs, timecharts, enrichment with MITRE ATT&CK Tactics and Techniques.
+
+
+Here is a dashboard example for Windows Security:
+![windows](./02-detection-engineering/05-dashboards/screenshots/windows-1.PNG)
+
+## Attack Scenarios
+
+- Linux complete scenario
+- Windows complete scenario
+- Phishing for credentials
+- C2 Beacon
+- False positives
+
+## Incident Response
+
+- Investigation
+- Timeline
+- IOC
+- Recommandation
+- Executive report (pdf)
+
+Results of alerts raised by attack scenario
+
+## Technical Stack
 
 Technical Stack
 - Ubuntu logs: syslog, rsyslog, auditd
-- Windows logs: WinEvent, Sysmon
-- Network monitoring: Suricata, Zeek
-- Malware monitoring: YARA
+- Windows logs: Windows Event Log, Sysmon
+- Network monitoring: Suricata, Zeek, tcpdump
+- Malware monitoring: YARA (on both Windows and Ubuntu endpoints)
 - Log forwarding: Splunk Universal Forwarder
-- SIEM: Splunk Enterprise dashboards and alerts
-- Attacks generated from Kali using hydra, python3, smbclient, netcat
+- SIEM: Splunk (free version) dashboards and alerts
+- Attacks generated from Kali using nmap, hydra, python3, smbclient, netcat
 - Automation of splunk reports creation and update: python3
+- Investigation: Wireshark, Splunk
 
+## Index
+
+- [01-architecture](./01-architecture/)
+- [02-detection-engineering](./02-detection-engineering/)
+    - [01-collection](./02-detection-engineering/01-collection/)
+    - [02-normalization](./02-detection-engineering/02-normalization/)
+    - [03-sigma-rules](./02-detection-engineering/03-sigma-rules/)
+    - [04-splunk-alerts](./02-detection-engineering/04-splunk-alerts/)
+    - [05-dashboards](./02-detection-engineering/05-dashboards/)
+- [03-incident-investigation](./03-incident-investigation/)
+
+
+## Lessons Learned
 
 Encontered problems and what I learned from them:
 - Ubuntu monitoring VM crashed, not enough space to handle the logs. I re created the machine efficiently using the documentation from this repository. This also led to adjusting the allowed size of the other VMs, and making clones of each VM.
@@ -29,26 +79,5 @@ Encontered problems and what I learned from them:
 - throughout the setup, testing is really important. I encountered many configuration problems that if not fixed during testing, could have led to failure to detect malicious activity.
 - Splunk Free does not allow creation of planned alert: need to create reports and run them manually. In order to avoid having to run one report for each splunk alert, I created another script to concatenate all alerts by platform, to be able to run all splunk alerts and collect them at once.
 - auditd encodes in hexadecimal the command line arguments if it contains special characters: I realized it while testing the alerts. Two points are learned from this: testing is paramount, and a macro was added to parse the command line properly.
-- logrotate recrée les fichiers avec mauvaises permissions donc les logs bash sudo et sshd ne sont plus écrits par syslog (solution chmod 666 sur les fichiers de logs, changement de la conf logrotate)
-
-
-
-
-Index
-
-Proposition d'organisation du readme:
-## Lab Objectives
-
-## Architecture
-
-## Data Collection
-
-## Detection Engineering
-
-## Attack Scenarios
-
-## Incident Response
-
-## Lessons Learned
-
-## Technical Stack
+- logrotates recreates the files with the wrong rights, so the user syslog was not allowed to write the bash, sudo and sshd logs in the corresponding log files. The solution is to attribute the correct rights to the file and modify the logortate scripts so that it creates the files correctly for the next rotation.
+- the windows endpoint has limitations. Since the version that I chose does not allow RDP connection, a future improvement can be to set up a Windows Server to monitor RDP Connections.

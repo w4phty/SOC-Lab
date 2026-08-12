@@ -1,7 +1,7 @@
 ## Splunk alerts
 
 
-For this lab, we create reports containing splunk requests, that will filter and search through the collected logs, and register any matching alert in the index **siem_alerts**.
+For this lab, we create reports containing splunk requests, that will filter and search through the collected logs, and register any matching alert in the **siem_alerts** index.
 
 Each alert contains the following mandatory fields: **alert_name, rule_id, severity, mitre_technique, platform, datasource, sigma_id formatted_time**. 
 
