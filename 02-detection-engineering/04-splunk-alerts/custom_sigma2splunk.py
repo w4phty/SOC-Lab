@@ -10,6 +10,7 @@ index_dict = {
 
 source_type_dict = {
     "auditd":"linux_audit",
+    "history":"bash_history",
     "sudo":"sudo",
     "sshd":"sshd",
     "yara":"yara",
@@ -28,6 +29,7 @@ platform_dict = {
 
 datasource_dict = {
     "auditd":"Audit",
+    "history":"Bash_history",
     "sudo":"Sudo",
     "sshd":"Sshd",
     "yara":"YARA",

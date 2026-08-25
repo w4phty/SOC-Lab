@@ -21,10 +21,7 @@ AND
     time=_time
 | append
 [
-    search index="linux_os" sourcetype="linux_audit"
- type=EXECVE
-   | `auditd_command_line`
-   | search 
+    search index="linux_os" sourcetype="bash_history"
 (
     command_line="*/python3*"
     OR command_line="*/python*"
@@ -42,15 +39,12 @@ AND
     severity="high",
     sigma_id="d61b394c-7428-467d-95f7-a944eee888ef",
     platform="Linux",
-    datasource="Audit",
+    datasource="Bash_history",
     formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
     time=_time]
 | append
 [
-    search index="linux_os" sourcetype="linux_audit"
- type=EXECVE
-   | `auditd_command_line`
-   | search 
+    search index="linux_os" sourcetype="bash_history"
 (
     command_line="*crontab -e*"
     OR command_line="*crontab -l*"
@@ -70,15 +64,12 @@ OR
     severity="medium",
     sigma_id="3a7a1520-c76a-4d8d-a73e-6dc75298e7c5",
     platform="Linux",
-    datasource="Audit",
+    datasource="Bash_history",
     formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
     time=_time]
 | append
 [
-    search index="linux_os" sourcetype="linux_audit"
- type=EXECVE
-   | `auditd_command_line`
-   | search 
+    search index="linux_os" sourcetype="bash_history"
 (
     command_line="*chmod +s*"
     OR command_line="*chmod u+s*"
@@ -93,7 +84,7 @@ OR
     severity="high",
     sigma_id="0fae9ca7-b70b-403d-983e-d59b001818c8",
     platform="Linux",
-    datasource="Audit",
+    datasource="Bash_history",
     formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
     time=_time]
 | append
@@ -135,10 +126,7 @@ authentication_action="*Failed password*"
     time=_time]
 | append
 [
-    search index="linux_os" sourcetype="linux_audit"
- type=EXECVE
-   | `auditd_command_line`
-   | search 
+    search index="linux_os" sourcetype="bash_history"
 (
     command_line="*/etc/passwd*"
     OR command_line="*/etc/shadow*"
@@ -153,7 +141,7 @@ authentication_action="*Failed password*"
     severity="low",
     sigma_id="96d0a298-2714-4842-95a5-db4b7eaaca78",
     platform="Linux",
-    datasource="Audit",
+    datasource="Bash_history",
     formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
     time=_time]
 | append

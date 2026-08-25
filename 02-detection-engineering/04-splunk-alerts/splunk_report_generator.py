@@ -34,9 +34,9 @@ def build_report(folder):
 
 def main():
     folder_linux = "02-detection-engineering/03-sigma-rules/linux"
-    folder_windows = "02-detection-engineering/03-sigma-rules/windows"
-    folder_network = "02-detection-engineering/03-sigma-rules/network"
-    for report in [folder_linux, folder_windows, folder_network]:
+    #folder_windows = "02-detection-engineering/03-sigma-rules/windows"
+    #folder_network = "02-detection-engineering/03-sigma-rules/network"
+    for report in [folder_linux]:#[folder_linux, folder_windows, folder_network]
         print("\nreport for ", report)
         print(build_report(report))
 
