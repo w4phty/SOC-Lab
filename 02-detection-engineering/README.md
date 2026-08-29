@@ -29,7 +29,7 @@ All the logs are forwarded to the SIEM through Splunk Forwarder.
 The logs collected do not use the same field names depending on the data source. The goal of this step is to normalize the fields so that detection rules can use the same fields for different data sources.
 Field normalization is done with the splunk configuration files [props.conf](./02-normalization/props.conf) and [transforms.conf](./02-normalization/transforms.conf). 
 
-Since some fields from auditd logs can be encoded in hexadecimal, an additional [macro](./02-normalization/auditd-macro.conf) is required to decode these arguments.
+Audit records belonging to a single auditd event are split accross multiple log records of different types (SYSCALL, EXECVE, CWD, PATH). In order to properly rebuild each audit event from the forwarded logs, an additional [SPL report](./02-normalization/linux_auditd_aggregate) is required. The report aggregates the audit records by audit event id, and produces normalized logs in a dedicated sourcetype. The report can be run regularly by the analyst to update the normalized data used in alert detection. In an Enterprise Splunk version, the report can be replaced by a scheduled SPL search to automate the normalization process.
 
 
 ### Sigma Detection Rules

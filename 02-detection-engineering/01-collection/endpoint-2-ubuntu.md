@@ -99,7 +99,7 @@ We create auditd rules in the file /etc/audit/rules.d/soc.rules :
 -a always,exit -F arch=b32 -S unlink  -k file_delete
 -a always,exit -F arch=b64 -S unlinkat -k file_delete
 -a always,exit -F arch=b32 -S unlinkat -k file_delete
-# hostname change -> un attaquant peut changer le nom pour créer de la confusion dans les logs
+# hostname change 
 -a always,exit -F arch=b64 -S sethostname -k hostname_change
 -a always,exit -F arch=b32 -S sethostname -k hostname_change
 # group change

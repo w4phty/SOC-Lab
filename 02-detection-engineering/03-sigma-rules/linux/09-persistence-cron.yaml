@@ -9,7 +9,7 @@ references:
   - https://attack.mitre.org/techniques/T1053/003/
 logsource:
   product: linux
-  service: history
+  service: auditd
 detection:
   selection_cmd:
     command_line|contains:

@@ -1,0 +1,24 @@
+index=linux_os sourcetype=linux_audit
+| rex "msg=audit\((?<audit_ts>[0-9]+\.[0-9]+):(?<audit_id>\d+)\)"
+| eval cwd_s=if(type="CWD", cwd, null())
+| eval uid_s=if(type="SYSCALL", UID, null())
+| eval auid_s=if(type="SYSCALL", AUID, null())
+| eval euid_s=if(type="SYSCALL", EUID, null())
+| eval pid_s=if(type="SYSCALL", pid, null())
+| eval ppid_s=if(type="SYSCALL", ppid, null())
+| eval exe_s=if(type="SYSCALL", exe, null())
+| rex max_match=0 "a\d+=\"(?<arg>[^\"]*)\""
+| eval exec_command=if(type="EXECVE", mvjoin(arg," "), null())
+| stats
+    first(uid_s) as user
+    first(auid_s) as effective_user
+    first(euid_s) as euid
+    first(pid_s) as process_id
+    first(ppid_s) as parent_process_id
+    first(exe_s) as executable
+    first(cwd_s) as cwd
+    first(exec_command) as command_line
+    first(_time) as _time
+    by host audit_ts audit_id
+| eval sourcetype="auditd_normalized"
+| collect index=linux_os sourcetype=linux_audit_normalized

@@ -9,7 +9,7 @@ index_dict = {
     }
 
 source_type_dict = {
-    "auditd":"linux_audit",
+    "auditd":"linux_audit_normalized",
     "history":"bash_history",
     "sudo":"sudo",
     "sshd":"sshd",
@@ -145,12 +145,7 @@ def build_splunk(file):
     filter_sourcetype =   f' sourcetype=\"{source_type_dict[file["logsource"]["service"]]}\"\n'
     splunk_request += filter_index
     splunk_request += filter_sourcetype
-    
-    # add auditd build command line
-    if (file["logsource"]["service"] == "auditd"):
-        filter_command_line = " type=EXECVE\n   | `auditd_command_line`\n   | search \n"
-        splunk_request += filter_command_line
-        
+            
     # add detection
     splunk_request += build_detection(file)
 
