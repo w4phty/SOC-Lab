@@ -1,0 +1,23 @@
+title: Persistence - Create Acount
+id: a8092e55-5b3e-4ba1-85b5-17900daab17f
+x_rule_id: SPL-32
+status: experimental
+description: |
+  Detects any change concerning identity files /etc/passwd and /etc/shadow, based on the auditd keys passwd_change and shadow_change.
+references:
+  - https://attack.mitre.org/techniques/T1053/
+logsource:
+  product: linux
+  service: auditd_raw
+detection:
+  selection:
+    key|contains:
+      - 'passwd_change'
+      - 'shadow_change'
+  condition: selection
+falsepositives:
+  - Legitimate user update
+level: low
+tags:
+  - attack.persistence
+  - attack.t1556.003

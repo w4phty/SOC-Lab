@@ -38,6 +38,9 @@ The uuids used in the sigma rules are generated using the script uuid_generator.
 | [SPL-21](./linux/21-lateral-movement-ssh.yaml) | SSH Connection | Lateral Movement | Remote Services – SSH | T1021.004
 | [SPL-26](./linux/26-unix-shell-yara.yaml) | Unix shell - YARA | Execution | Command and Scripting Interpreter – Unix Shell | T1059.004
 | [SPL-27](./linux/27-execution-python-yara.yaml) | Python execution - YARA | Execution | Command and Scripting Interpreter – Python | T1059.006
+| [SPL-30](./linux/30-persistence-cron-change.yaml) | Persistence via cron | Persistence | Scheduled Task/Job – Cron | T1053.003
+| [SPL-31](./linux/31-persistence-ssh-change.yaml) | Persistence via SSH | Persistence | Account manipulation - SSH Authorized Keys | T1098.004
+| [SPL-32](./linux/32-persistence-identity-file-change.yaml) |Persistence via PAM | Persistence | Pluggable Authentication Modules | T1556.003
 
 
 ### Network Sigma Rules

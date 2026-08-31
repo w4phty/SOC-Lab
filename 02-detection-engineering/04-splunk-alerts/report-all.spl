@@ -52,7 +52,6 @@ AND
 OR
 (
     command_line="*/etc/cron.d/*"
-    OR command_line="*/etc/crontab*"
     OR command_line="*/var/spool/cron/*"
 )
 | eval alert_name="Persistence - Suspicious cron modification",
@@ -178,6 +177,52 @@ alert_signature="*Python_Backdoor_Indicators*"
     sigma_id="02de2b02-ea38-439a-8099-a9d987d509c7",
     platform="Linux",
     datasource="YARA",
+    formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
+    time=_time]
+| append
+[
+    search index="linux_os" sourcetype="linux_audit"
+(
+    key="*cron_change*"
+)
+| eval alert_name="Persistence - Cron Change",
+    rule_id="SPL-30",
+    mitre_technique="T1053.003",
+    severity="low",
+    sigma_id="ee52ecb4-e679-47d7-a63d-0cf939323fc2",
+    platform="Linux",
+    datasource="Audit",
+    formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
+    time=_time]
+| append
+[
+    search index="linux_os" sourcetype="linux_audit"
+(
+    key="*ssh_change*"
+)
+| eval alert_name="Persistence - SSH Change",
+    rule_id="SPL-31",
+    mitre_technique="T1098.004",
+    severity="low",
+    sigma_id="140712c2-0222-46b2-a3c4-d3b63f187172",
+    platform="Linux",
+    datasource="Audit",
+    formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
+    time=_time]
+| append
+[
+    search index="linux_os" sourcetype="linux_audit"
+(
+    key="*passwd_change*"
+    OR key="*shadow_change*"
+)
+| eval alert_name="Persistence - Create Acount",
+    rule_id="SPL-32",
+    mitre_technique="T1556.003",
+    severity="low",
+    sigma_id="a8092e55-5b3e-4ba1-85b5-17900daab17f",
+    platform="Linux",
+    datasource="Audit",
     formatted_time=strftime(_time,"%Y-%m-%d %H:%M:%S"),
     time=_time]
 | append

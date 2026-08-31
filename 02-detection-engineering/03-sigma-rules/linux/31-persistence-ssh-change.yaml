@@ -1,0 +1,22 @@
+title: Persistence - SSH Change
+id: 140712c2-0222-46b2-a3c4-d3b63f187172
+x_rule_id: SPL-31
+status: experimental
+description: |
+  Detects any change concerning ssh authorization updates, based on the auditd key ssh_change.
+references:
+  - https://attack.mitre.org/techniques/T1053/
+logsource:
+  product: linux
+  service: auditd_raw
+detection:
+  selection:
+    key|contains:
+      - 'ssh_change'
+  condition: selection
+falsepositives:
+  - Legitimate cron jobs update
+level: low
+tags:
+  - attack.persistence
+  - attack.t1098.004

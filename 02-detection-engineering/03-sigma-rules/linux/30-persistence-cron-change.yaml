@@ -1,0 +1,22 @@
+title: Persistence - Cron Change
+id: ee52ecb4-e679-47d7-a63d-0cf939323fc2
+x_rule_id: SPL-30
+status: experimental
+description: |
+  Detects any change concerning cron jobs, based on the auditd key cron_change.
+references:
+  - https://attack.mitre.org/techniques/T1053/
+logsource:
+  product: linux
+  service: auditd_raw
+detection:
+  selection:
+    key|contains:
+      - 'cron_change'
+  condition: selection
+falsepositives:
+  - Legitimate cron jobs update
+level: low
+tags:
+  - attack.persistence
+  - attack.t1053.003

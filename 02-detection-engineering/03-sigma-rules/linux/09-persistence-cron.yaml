@@ -21,7 +21,6 @@ detection:
   selection_file:
     command_line|contains:
       - '/etc/cron.d/'
-      - '/etc/crontab'
       - '/var/spool/cron/'
   condition: selection_cmd or selection_file
 falsepositives:
