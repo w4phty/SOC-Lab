@@ -34,7 +34,7 @@ _Figure-02: Packet-level evidence of network host discovery_
 
 ### 1.3. Port Discovery
 
-Following the host discovery, the packet capture shows TCP SYN requests originating from 10.10.10.1 and targeting 10.10.10.2 on a wide range of port numbers. This can be associated with a port scan targeting the 10.10.10.2 host. A few ports responded with the SYN/ACK flags and are probably opened (21, 22, 139, 445), indicating that FTP, SSH, SMB-related services are exposed and could be investigated by an attacker.
+Following the host discovery, the packet capture shows TCP SYN requests originating from 10.10.10.1 and targeting 10.10.10.2 on a wide range of port numbers. This can be associated with a port scan targeting the 10.10.10.2 host. A few ports responded with the SYN/ACK flags and are probably opened (21, 22, 139, 445), indicating that these ports were reachable, had a service listening at the time of the scan and could be investigated by an attacker. Common services associated with this ports are respectively FTP, SSH, SMB-related services.
 Wireshark request to find open ports responding to the port scan:
 `ip.src == 10.10.10.2 && tcp.flags.syn == 1 && tcp.flags.ack == 1`
 
@@ -44,7 +44,7 @@ _Figure-03: Packet-level evidence of service discovery on the targeted host_
 
 ### 1.4. Service Interaction
 
-The packet capture also shows an FTP connection immediately after the Service discovery scan ends. The connection is initiated from 10.10.10.1, and does not lead to a successful connection to the ftp server. However the banner `Welcome to charlie's FTP service.` is shown to the user that initiated the connection. This connection is not detected in the SIEM.
+The packet capture also shows an FTP connection immediately after the Service discovery scan ends. The connection is initiated from 10.10.10.1, and does not lead to a successful FTP session to the ftp server. However the banner `Welcome to charlie's FTP service.` is returned to the client that initiated the connection. This connection is not detected in the SIEM.
 
 ![Figure-04](./evidence/03-ftp-traffic-analysis.PNG)
 
@@ -91,9 +91,9 @@ The result shows requests originating from a single IP address (10.10.10.1).
 | - | - | - | -
 | 10.10.10.1 |	208 |	08/29/2026 18:17:25 |	08/29/2026 18:18:22
 
-### 2.3. Succesful SSH connection
+### 2.3. Successful SSH connection
 
-Sshd logs show that 2 succesffull SSH connection are established for the user charlie, originating from the src_ip 10.10.10.1, respectively at 18:18:22.000 and 18:19:00.000 when looking for the keywords "Accepted password". 
+Sshd logs show that 2 successful SSH connection are established for the user charlie, originating from the src_ip 10.10.10.1, respectively at 18:18:22.000 and 18:19:00.000 when looking for the keywords "Accepted password". 
 
 However, the pam events show 3 successive ssh sessions concerning the targeted account.
 
@@ -148,7 +148,7 @@ The results show a succession of commands aiming to gather information about the
 
 ### 3.3. Process tree
 
-The commands are executed with the same parent process id. In order to determine what is the parent process associated with these commands, we can pivot using the parent_process_id (4351) in order to rebuild the process tree. The process tree is primarily reconstructed using the process_id and parent_process_id fields from the normalized auditd events. When a process relationship is missing or inconsistent in the normalized data, the raw auditd events are used to validate and complete the process tree reconstruction.
+The commands are executed with the same parent process ID. In order to determine what is the parent process associated with these commands, we can pivot using the parent_process_id (4351) in order to rebuild the process tree. The process tree is primarily reconstructed using the process_id and parent_process_id fields from the normalized auditd events. When a process relationship is missing or inconsistent in the normalized data, the raw auditd events are used to validate and complete the process tree reconstruction.
 
 _time	 | process_id | 	parent_process_id |	executable
 |-|-|-|-
@@ -160,7 +160,7 @@ The parent event concerns an SSH session, initiated from the IP address 10.10.10
 
 ### 3.4. Conclusion
 
-Both SPL-18 alerts are confirmed as true positives. The observed commands are compatible with host and account discovery. The commands share the parent process id 4351. The process tree was reconstructed up to PID 4350, identified as /usr/sbin/sshd in the raw auditd logs. The associated audit session (ses=7), account (charlie), SSH terminal, and source IP (10.10.10.1) correlate this activity with the SSH session established at 18:19:00. This provides a strong correlation with the successful SSH access identified during the Initial Access phase.
+Both SPL-18 alerts are confirmed as true positives. The observed commands are compatible with host and account discovery. The commands share the parent process ID 4351. The process tree was reconstructed up to PID 4350, identified as /usr/sbin/sshd in the raw auditd logs. The associated audit session (ses=7), account (charlie), SSH terminal, and source IP (10.10.10.1) correlate this activity with the SSH session established at 18:19:00. This provides a strong correlation with the successful SSH access identified during the Initial Access phase.
 
 ## 4.0. Privilege escalation
 
@@ -217,7 +217,7 @@ This is consistent with both binaries `/usr/bin/sudo` and `/usr/bin/find` having
 ### 4.4. Conclusion
 
 Both SPL-13 and SPL-09 alerts are confirmed as true positives. The observed commands match with privilege escalation discovery activity.
-The process tree was reconstructed and processes correlated to effective users. The observed results indicate that the SUID-enabled `/usr/bin/find` binary was abused in order to obtain a shell with root privileges. The process tree also provides a strong correlation between this successful privilege escalation and the previously identified discovery activity based on the common parent process id 4351 and the time window. 
+The process tree was reconstructed and processes correlated to effective users. The observed results indicate that the SUID-enabled `/usr/bin/find` binary was abused in order to obtain a shell with root privileges. The process tree also provides a strong correlation between this successful privilege escalation and the previously identified discovery activity based on the common parent process ID 4351 and the time window. 
 
 
 ## 5.0. Persistence
@@ -232,7 +232,7 @@ _Figure-11: Persistence alerts_
 
 ### 5.2. Scheduled job with cron
 
-The pivot fields used are the user (charlie), the timestamp to select the time window (18:26:08 to 18:27:49), and the parent process id (4416, 4351) corresponding to the previously identified shells, respectively the elevated shell and the shell initiated within the SSH session (ses=7). The SPL request to view logs from the normalized auditd data source is the following:
+The pivot fields used are the user (charlie), the timestamp to select the time window (18:26:08 to 18:27:49), and the parent process ID (4416, 4351) corresponding to the previously identified shells, respectively the elevated shell and the shell initiated within the SSH session (ses=7). The SPL request to view logs from the normalized auditd data source is the following:
 ```
 index="linux_os" sourcetype="linux_audit_normalized" user="charlie"
 | where parent_process_id IN ("4416", "4351")
@@ -276,7 +276,7 @@ Although the content of the file is not seen in the SIEM, the malicious content 
 
 ### 5.4. SSH authorized connection
 
-The following activity is observable by extending the time window while using the same pivot fields as earlier. The results indicate that the user charlie performed a creation of SSH keys within the elevated shell.
+The following activity is observable by extending the time window while using the same pivot fields as earlier. The results indicate that the user charlie created SSH keys within the elevated shell.
 
 ![Figure-16](./evidence/16-ssh-persistence.PNG)
 
@@ -302,14 +302,57 @@ Both SPL-09 and SPL-30 alerts are confirmed as true positives. The cron activity
 Another suspicious activity is identified concerning the creation of a new key-based SSH access followed by a brief SSH session originated from the IP address 10.10.10.1, which is compatible with the establishment of a second persistence mechanism. The activity was observable in the telemetry available but was not detected by the SIEM detection logic, since the SSH connection related alerts are based on the successful/failure password-based authentication.
 
 
-## 6.0. Exfiltration
+## 6.0. Data Collection & Exfiltration
 
 ### 6.1. Detection
 
+Two alerts are raised. The first one at 18:31:21 based on auditd logs (SPL-18) is triggered when the command line contains specific strings such as "/etc/shadow". The second one at 18:35:53 based on zeek log (SPL-25) is triggered when a large amount of data is sent over the port 443 for at least a certain amount of time. 
+
+![Figure-20](./evidence/20-exfiltration-alerts.PNG)
+
+_Figure-20: Data collection and exfiltration related alerts_
+
 ### 6.2. Data collection
 
-### 6.3. Zeek
+We observe the activity within a time window around 18:31:21, using the pivot fields user (charlie), and the parent process ID (4416). The result indicates that the user created a `docs` folder and copied both files `/etc/shadow` and `RH-archive` into the newly created `docs` folder. The parent process ID provides strong evidence that  the activity occurred from the elevated shell identified previously.
 
-### 6.4. Wireshark analysis
+![Figure-21](./evidence/21-data-collection.PNG)
 
-### 6.5. Conclusion
+_Figure-21: Data collection_
+
+
+### 6.3. Data exfiltration
+
+Slightly extending the time window shows that the user attempted to send the collected files towards the destination IP address 10.10.10.1 on port 443.
+
+![Figure-22](./evidence/22-auditd-data-exfiltration.PNG)
+
+_Figure-22: Data transfer with curl_
+
+In order to verify the traffic that occurred, we pivot to Zeek logs based on the fields provided in the previous analysis and the alert raised: source IP address (10.10.10.2), destination IP address (10.10.10.1), source port (34162), destination port (443), and the time window (around 18:35:53). The SPL request used is the following:
+```
+index="monitoring" sourcetype="zeek_conn" src_ip="10.10.10.2" dest_ip="10.10.10.1" dest_port="443" src_port="34162"
+```
+
+One corresponding Zeek connection event is found, showing a TCP connection that lasted over 51 seconds and transferred approximately 10 megabytes. The timestamp matches the first exfiltration command line observed previously, concerning the RH-archive file. However there is no second event, which might indicate that the second transfer attempt failed or that both transfers occurred on the same TCP connection. 
+
+![Figure-23](./evidence/23-zeek.PNG)
+
+_Figure-23: Zeek event_
+
+In order to verify the traffic that actually happened, we investigate the tcpdump packet-level capture. We use the pivot field source IP address and destination IP address. We observe a large quantity of TCP packets reaching 10.10.10.1 on port 443. Following the HTTP flow, we observe that the `/etc/shadow` file was successfully sent to 10.10.10.1, with the curl user agent, at the time of the observed curl command lines.
+
+![Figure-24](./evidence/24-tcpdump.PNG)
+
+_Figure-24: /etc/shadow exfiltration_
+
+
+### 6.4. Conclusion
+
+Both SPL-18 and SPL-25 alerts are confirmed as true positives. The observed activity is consistent with the collection of sensitive files (`RH-archive` and `/etc/shadow`), followed by their exfiltration to 10.10.10.1. The parent process ID (4416) provides strong evidence that the activity originated from the same elevated shell identified previously. Zeek logs confirm the corresponding network connection and the transfer of approximately 10 MB of data. Packet-level investigation confirmed that the data was successfully transferred to 10.10.10.1 through HTTP traffic, using the user agent curl.
+
+### 7.0 Post-Compromise Activity
+
+Post-Compromise activity can be observed in the auditd logs by extending the time window. The user performed `vim .bash_history` in order to remove traces of previously executed commands from the shell history. This can be confirmed directly on the endpoint, by viewing the bash history: none of the command lines observed during the investigation appear in the local history.
+
+This indicates that the post compromission activity was not detected in the SIEM. However the activity remains observable in the SIEM and in specific log files on the endpoint.

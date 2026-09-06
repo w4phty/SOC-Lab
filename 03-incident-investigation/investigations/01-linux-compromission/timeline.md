@@ -1,2 +1,2 @@
-| Time | Phase | Activity | Source | Detection |
+| Time | Phase | Activity | Source | pivot fields | Detection coverage |
 | - | - | - | - | - |
