@@ -1,1 +1,0 @@
-Contain → Eradicate → Recover → Validate
