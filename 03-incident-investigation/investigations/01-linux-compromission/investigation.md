@@ -244,7 +244,7 @@ index="linux_os" sourcetype="linux_audit_normalized" user="charlie"
 _Figure-12: Observed activity_
 
 The results show the observable activity within the elevated shell: the user viewed a file named `work_task.sh`, and the end of `/etc/crontab`.
-However the observed activity does not provide evidence of the `/etc/crontab` file modification.
+However the observed activity does not provide evidence of a modification to `/etc/crontab`.
 Therefore we pivot to raw auditd logs using the key field (cron_change): an event corresponding to this key is observed at 18:27:43, with the PID 4416 indicating that the modification was done from the elevated shell.
 
 ![Figure-13](./evidence/13-key-cron-change.PNG)

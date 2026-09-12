@@ -40,7 +40,7 @@ Different detection levels:
 - the malicious action itself did not trigger an alert, but the related activity did.
 - not detected, but observed in the telemetry when investigating the surrounding activity of an alert
 
-Improvement that need to be done based on this incident coverage:
+Improvement that need to be done based on the coverage gaps discovered:
 
 1. **Critical** : add an auditd rule to watch any changes made on `~/.ssh/authorized_keys` for all users
 2. **High** : create a Sigma rule to detect the SUID abuse
