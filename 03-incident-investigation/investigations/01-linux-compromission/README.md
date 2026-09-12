@@ -7,11 +7,11 @@ The incident scenario simulates an attack, including the following phases: recon
     - SIEM: Splunk, logs are forwarded from the Ubuntu Endpoint (rsyslog, auditd, YARA) and the monitoring machine (zeek, suricata, tcpdump)
 
 
-Three levels of report are available:
+Different levels of reporting are available:
 - the **incident timeline**, right below
 - [investigation.md](./investigation.md): the **detailed investigation**, queries, evidence, conclusion
-- incident-response.md : the actions to detect, contain, eradicate and recover from the incident
-- executive_report.pdf: the **executive report** including the environment monitored, key findings, recommandations
+- [incident-response.md](./incident-response.md) : the actions to detect, contain, eradicate and recover from the incident
+- [executive-report.pdf](../../executive-reports/01-linux-executive-report.pdf): the **executive report** including the environment monitored, key findings, recommandations
 
 # Incident timeline
 

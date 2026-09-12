@@ -1,106 +1,117 @@
-Contain → Eradicate → Recover → Validate
+# Incident Response
 
-Structuré selon le cycle standard de réponse à incident (détection → confinement → éradication → récupération). **Toujours préserver les preuves avant de remédier** — une commande de nettoyage exécutée trop tôt peut détruire une preuve nécessaire à la suite du dossier.
+## Live detection
 
-### 17.1 Détection live (lecture seule, à exécuter en premier)
-
-**Sessions actives / présence de l'attaquant en ce moment**
-```bash
-who                          # sessions interactives actuellement ouvertes
-w                             # idem, avec la commande en cours par session
-last -a | head -30            # historique des connexions récentes, avec IP source
-ss -tnp | grep ':22'          # connexions SSH établies, avec PID
+Detect live sessions, associated PIDs, source IP address:
+```
+who                          
+w                            
+last -a | head -30            
+ss -tnp | grep ':22'         
 ```
 
-**Connexions réseau suspectes / reverse shell active**
-```bash
-ss -tnp                       # toutes les connexions actives avec PID/process
-lsof -i -P -n                 # alternative si ss limité, mappe socket -> process
-ps auxf                       # arborescence des process, repère un parent inhabituel (ex: sshd -> bash -> nc)
+The results show an ongoing SSH session originating from 10.10.10.1.
+
+![ir-1](./evidence/ir-1.PNG)
+
+
+Detect live network connections:
+```
+ss -tnp                       
+lsof -i -P -n                
+ps auxf                      
 ```
 
-**Vérification de persistence (à faire pour CHAQUE compte utilisateur du système, pas seulement le compte compromis)**
-```bash
+![ir-3](./evidence/ir-3.PNG)
+
+Find persistence method established for any user:
+```
 for u in $(cut -f1 -d: /etc/passwd); do
   echo "== $u =="; cat /home/$u/.ssh/authorized_keys 2>/dev/null
 done
 systemctl list-unit-files --state=enabled | grep -vE '^(systemd|cron|ssh|network)'
 find /etc/systemd/system -maxdepth 1 -newer /etc/hostname -type f
-crontab -l -u <user_compromis> 2>/dev/null
+crontab -l -u charlie 2>/dev/null
 cat /etc/crontab; ls -la /etc/cron.d/
-find / -perm -4000 -type f 2>/dev/null   # comparer à une baseline connue du système sain
+find / -perm -4000 -type f 2>/dev/null   
 ```
 
-**État de l'historique shell (fenêtre d'activité, anti-forensics)**
-```bash
+Verify the shell history:
+```
 echo $HISTFILE
 stat ~/.bash_history
 ```
 
-### 17.2 Confinement (une fois les preuves capturées)
+## Contain
 
-**Couper la session active de l'attaquant sans tuer tout le serveur**
-```bash
-# Identifier le PID exact via w/who/ss avant de cibler
-kill -9 <pid_session_attaquant>
-# Ou, si systemd-logind est utilisé, plus propre :
-loginctl terminate-user <user_compromis>
+Stop the attacker session:
 ```
-> ⚠️ Attention à l'ordre : si une persistence automatique (service systemd, cron) n'est pas encore désactivée, tuer la session ne fait qu'interrompre temporairement l'accès — l'attaquant (ou son implant) peut revenir immédiatement. Traiter confinement de session et éradication de la persistence **dans la même fenêtre d'intervention**, pas en deux temps espacés.
-
-**Neutraliser le compte compromis**
-```bash
-usermod -L <user_compromis>                    # verrouille le mot de passe
-usermod -s /usr/sbin/nologin <user_compromis>   # empêche toute nouvelle connexion shell
+kill -9 4365
+loginctl terminate-user charlie
 ```
-> Ne pas se contenter de forcer un changement de mot de passe (`passwd -e`) si le compte est confirmé compromis avec persistence par clé SSH : la clé injectée contourne le mot de passe. Le retrait de la clé (ci-dessous) est indispensable en complément.
 
-**Blocage réseau (à défaut d'un contrôle périmétrique déjà en place)**
-```bash
-iptables -A OUTPUT -d <ip_attaquant> -j DROP
-iptables -A INPUT -s <ip_attaquant> -j DROP
+
+Neutralize the compromised account
 ```
-> Un blocage au pare-feu périmétrique (ou EDR/NDR central) est préférable à un blocage local uniquement — un attaquant root peut modifier les règles iptables locales. Demander le blocage en parallèle côté équipe réseau.
+usermod -L charlie                    
+usermod -s /usr/sbin/nologin charlie  
+```
 
-### 17.3 Éradication (suppression de la persistence)
+Block any outbount or inbound network connection involving the attacker IP address:
+```
+iptables -A OUTPUT -d 10.10.10.1 -j DROP
+iptables -A INPUT -s 10.10.10.1 -j DROP
+```
 
-**Retirer la clé SSH injectée — jamais supprimer tout le fichier en aveugle**
-```bash
-# 1. Identifier précisément la ligne injectée (comparer avec une sauvegarde connue si disponible)
+
+## Eradicate
+
+Identify and remove the added SSH key:
+```
 cat ~/.ssh/authorized_keys
-# 2. Supprimer uniquement la ligne correspondant à la clé de l'attaquant (remplacer le motif)
-sed -i '/<empreinte_ou_extrait_unique_de_la_cle_attaquant>/d' ~/.ssh/authorized_keys
+sed -i '/6DY7Q64Lh8oQZIitIn/d' ~/.ssh/authorized_keys
 ```
 
-**Supprimer le service systemd malveillant**
-```bash
-systemctl stop backdoor.service
-systemctl disable backdoor.service
-rm -f /etc/systemd/system/backdoor.service
-systemctl daemon-reload
-systemctl reset-failed
+Remove all cron related activity:
+```
+crontab -e -u charlie
+ls -la /etc/cron.d/ 
+cat /etc/crontab
+sed -i '/work_task.sh/d' /etc/crontab
 ```
 
-**Retirer toute entrée cron injectée si trouvée (persistence non utilisée ici mais à vérifier systématiquement)**
-```bash
-crontab -e -u <user_compromis>     # retrait manuel interactif, plus sûr qu'un sed aveugle
-ls -la /etc/cron.d/                # vérifier l'absence de fichier ajouté récemment
+Once the evidence is preserved, delete the malicious file used to achieve persistence:
+```
+rm /home/charlie/work_task.sh
 ```
 
-**Traiter les fuites de secrets confirmées (phase 8)**
-```bash
-# Rotation de TOUS les secrets consultés/exfiltrés, pas seulement ceux du compte initial
-passwd <chaque_user_concerné>          # nouveaux mots de passe
-# Régénérer et redistribuer toute clé SSH présente dans /etc/shadow ou home dirs consultés
+Remove the folder used for data collection
+```
+rm -rf /home/charlie/docs
 ```
 
-### 17.4 Récupération et vérification post-remédiation
-```bash
-# Revérifier l'absence de persistence après nettoyage
+Rotate all exfiltrated secrets:
+```
+passwd charlie          
+```
+
+Remove the SUID bit from the binary:
+```
+chmod -s /usr/bin/find
+```
+
+## Recover & Validate
+
+Verify no persistence method is left:
+```
 for u in $(cut -f1 -d: /etc/passwd); do cat /home/$u/.ssh/authorized_keys 2>/dev/null; done
-systemctl list-unit-files --state=enabled | grep -i backdoor   # doit être vide
-find / -perm -4000 -type f 2>/dev/null   # comparer de nouveau à la baseline
-who; w                                    # confirmer l'absence de session résiduelle
+systemctl list-unit-files --state=enabled | grep -i backdoor   
+find / -perm -4000 -type f 2>/dev/null   
+who; w                                    
 ```
 
-**À consigner dans le rapport final** : horodatage de chaque commande exécutée, résultat obtenu, et nom de l'analyste — ce tableau devient la section "actions de remédiation" du rapport d'incident.
+Unlock the user:
+```
+sudo usermod -U charlie
+```
+
